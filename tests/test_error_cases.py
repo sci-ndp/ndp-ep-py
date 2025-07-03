@@ -2,7 +2,7 @@
 
 import pytest
 import requests_mock
-from requests.exceptions import HTTPError, RequestException
+from requests.exceptions import RequestException
 
 from ndp_ep.api_client import APIClient
 

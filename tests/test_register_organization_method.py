@@ -2,7 +2,6 @@
 
 import pytest
 import requests_mock
-from requests.exceptions import HTTPError
 
 from ndp_ep.register_organization_method import APIClientOrganizationRegister
 

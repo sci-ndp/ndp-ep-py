@@ -1,9 +1,7 @@
 """Tests for search functionality."""
 
 import pytest
-import requests
 import requests_mock
-from requests.exceptions import HTTPError
 
 from ndp_ep.search_method import APIClientSearch
 

@@ -1,6 +1,6 @@
 """Search functionality for datasets."""
 
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Any
 from requests.exceptions import HTTPError
 
 from .client_base import APIClientBase
@@ -13,7 +13,7 @@ class APIClientSearch(APIClientBase):
         self,
         terms: List[str],
         keys: Optional[List[Optional[str]]] = None,
-        server: str = "global"
+        server: str = "global",
     ) -> List[Dict[str, Any]]:
         """
         Search datasets by a list of terms with optional key specifications.
@@ -39,7 +39,9 @@ class APIClientSearch(APIClientBase):
                     "or keys must be omitted."
                 )
             # Convert Python None to JSON null for the API
-            processed_keys = [key if key is not None else "null" for key in keys]
+            processed_keys = [
+                key if key is not None else "null" for key in keys
+            ]
         else:
             processed_keys = None
 
@@ -61,7 +63,9 @@ class APIClientSearch(APIClientBase):
                 error_detail = str(e)
             raise ValueError(f"Error searching for datasets: {error_detail}")
 
-    def advanced_search(self, search_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def advanced_search(
+        self, search_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """
         Perform an advanced search using the POST /search endpoint.
 

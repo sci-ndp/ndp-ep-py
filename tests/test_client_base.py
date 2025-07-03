@@ -3,7 +3,6 @@
 import pytest
 import requests
 import requests_mock
-from unittest.mock import patch
 
 from ndp_ep.client_base import APIClientBase
 

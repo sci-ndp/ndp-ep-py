@@ -2,7 +2,6 @@
 
 import pytest
 import requests_mock
-from requests.exceptions import HTTPError
 
 from ndp_ep.register_kafka_method import APIClientKafkaRegister
 from ndp_ep.register_s3_method import APIClientS3Register

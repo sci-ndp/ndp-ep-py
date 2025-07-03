@@ -2,7 +2,6 @@
 
 import pytest
 import requests_mock
-from requests.exceptions import HTTPError
 
 from ndp_ep.delete_organization_method import APIClientOrganizationDelete
 from ndp_ep.delete_resource_method import APIClientResourceDelete
