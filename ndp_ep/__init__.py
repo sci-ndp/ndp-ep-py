@@ -36,8 +36,5 @@ __all__ = [
     "__description__",
 ]
 
-# Module-level convenience imports
-from .api_client import APIClient
-
 # Default client for backward compatibility
 Client = APIClient
