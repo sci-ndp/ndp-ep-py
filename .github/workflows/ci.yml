@@ -40,7 +40,7 @@ jobs:
     
     - name: Type check with mypy
       run: |
-        mypy ndp_ep --ignore-missing-imports
+        mypy ndp_ep
     
     - name: Test with pytest
       run: |
