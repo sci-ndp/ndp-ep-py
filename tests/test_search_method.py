@@ -213,7 +213,7 @@ class TestAPIClientSearch:
             result = client.search_datasets(terms=[])
             
             assert result == []
+            # When terms is empty, requests doesn't include it in query string
             assert m.last_request.qs == {
-                "terms": [],
                 "server": ["global"]
             }
