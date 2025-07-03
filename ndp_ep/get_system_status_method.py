@@ -32,13 +32,11 @@ class APIClientSystemStatus(APIClientBase):
             ) from http_err
         except requests.exceptions.RequestException as req_err:
             raise ValueError(
-                "An error occurred while fetching system "
-                f"status: {req_err}"
+                "An error occurred while fetching system " f"status: {req_err}"
             ) from req_err
         except ValueError as json_err:
             raise ValueError(
-                "An error occurred while parsing system "
-                f"status: {json_err}"
+                "An error occurred while parsing system " f"status: {json_err}"
             ) from json_err
 
     def get_system_metrics(self) -> Dict[str, Any]:

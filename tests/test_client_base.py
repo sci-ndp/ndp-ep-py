@@ -28,11 +28,12 @@ class TestAPIClientBase:
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
             client = APIClientBase(
-                base_url="http://example.com",
-                token="test-token"
+                base_url="http://example.com", token="test-token"
             )
             assert client.token == "test-token"
-            assert client.session.headers["Authorization"] == "Bearer test-token"
+            assert (
+                client.session.headers["Authorization"] == "Bearer test-token"
+            )
 
     def test_init_with_username_password(self):
         """Test initialization with username and password."""
@@ -40,15 +41,16 @@ class TestAPIClientBase:
             m.post(
                 "http://example.com/token",
                 json={"access_token": "retrieved-token"},
-                status_code=200
+                status_code=200,
             )
             client = APIClientBase(
-                base_url="http://example.com",
-                username="user",
-                password="pass"
+                base_url="http://example.com", username="user", password="pass"
             )
             assert client.token == "retrieved-token"
-            assert client.session.headers["Authorization"] == "Bearer retrieved-token"
+            assert (
+                client.session.headers["Authorization"]
+                == "Bearer retrieved-token"
+            )
 
     def test_init_with_both_token_and_credentials_raises_error(self):
         """Test that providing both token and credentials raises ValueError."""
@@ -57,7 +59,7 @@ class TestAPIClientBase:
                 base_url="http://example.com",
                 token="test-token",
                 username="user",
-                password="pass"
+                password="pass",
             )
 
     def test_init_without_auth_checks_api_availability(self):
@@ -70,7 +72,9 @@ class TestAPIClientBase:
     def test_check_api_availability_connection_error(self):
         """Test _check_api_availability with connection error."""
         with requests_mock.Mocker() as m:
-            m.get("http://example.com", exc=requests.exceptions.ConnectionError)
+            m.get(
+                "http://example.com", exc=requests.exceptions.ConnectionError
+            )
             with pytest.raises(ValueError, match="Failed to connect"):
                 APIClientBase(base_url="http://example.com")
 
@@ -78,14 +82,21 @@ class TestAPIClientBase:
         """Test _check_api_availability with HTTP error."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=500)
-            with pytest.raises(ValueError, match="API connection check failed"):
+            with pytest.raises(
+                ValueError, match="API connection check failed"
+            ):
                 APIClientBase(base_url="http://example.com")
 
     def test_check_api_availability_request_exception(self):
         """Test _check_api_availability with general request exception."""
         with requests_mock.Mocker() as m:
-            m.get("http://example.com", exc=requests.exceptions.RequestException("Test error"))
-            with pytest.raises(ValueError, match="An error occurred while attempting"):
+            m.get(
+                "http://example.com",
+                exc=requests.exceptions.RequestException("Test error"),
+            )
+            with pytest.raises(
+                ValueError, match="An error occurred while attempting"
+            ):
                 APIClientBase(base_url="http://example.com")
 
     def test_get_token_success(self):
@@ -95,12 +106,14 @@ class TestAPIClientBase:
             m.post(
                 "http://example.com/token",
                 json={"access_token": "new-token"},
-                status_code=200
+                status_code=200,
             )
             client = APIClientBase(base_url="http://example.com")
             client.get_token("user", "pass")
             assert client.token == "new-token"
-            assert client.session.headers["Authorization"] == "Bearer new-token"
+            assert (
+                client.session.headers["Authorization"] == "Bearer new-token"
+            )
 
     def test_get_token_no_access_token_in_response(self):
         """Test token retrieval when no access token in response."""
@@ -115,7 +128,10 @@ class TestAPIClientBase:
         """Test token retrieval with connection error."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
-            m.post("http://example.com/token", exc=requests.exceptions.ConnectionError)
+            m.post(
+                "http://example.com/token",
+                exc=requests.exceptions.ConnectionError,
+            )
             client = APIClientBase(base_url="http://example.com")
             with pytest.raises(ValueError, match="Failed to connect"):
                 client.get_token("user", "pass")
@@ -126,7 +142,9 @@ class TestAPIClientBase:
             m.get("http://example.com", status_code=200)
             m.post("http://example.com/token", status_code=401)
             client = APIClientBase(base_url="http://example.com")
-            with pytest.raises(ValueError, match="Invalid username or password"):
+            with pytest.raises(
+                ValueError, match="Invalid username or password"
+            ):
                 client.get_token("user", "pass")
 
     def test_get_token_http_error(self):
@@ -142,9 +160,14 @@ class TestAPIClientBase:
         """Test token retrieval with general request exception."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
-            m.post("http://example.com/token", exc=requests.exceptions.RequestException("Test error"))
+            m.post(
+                "http://example.com/token",
+                exc=requests.exceptions.RequestException("Test error"),
+            )
             client = APIClientBase(base_url="http://example.com")
-            with pytest.raises(ValueError, match="An error occurred while attempting"):
+            with pytest.raises(
+                ValueError, match="An error occurred while attempting"
+            ):
                 client.get_token("user", "pass")
 
     def test_base_url_strips_trailing_slash(self):

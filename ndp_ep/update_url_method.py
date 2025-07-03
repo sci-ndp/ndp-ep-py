@@ -10,10 +10,7 @@ class APIClientURLUpdate(APIClientBase):
     """Extension of APIClientBase with URL resource update method."""
 
     def update_url_resource(
-        self,
-        resource_id: str,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, resource_id: str, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Update an existing URL resource by making a PUT request.
@@ -49,7 +46,7 @@ class APIClientURLUpdate(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Resource not found" in error_detail:
                 raise ValueError("Error updating URL resource: Not found")
             elif "Reserved key error" in error_detail:

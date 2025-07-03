@@ -10,9 +10,7 @@ class APIClientServiceRegister(APIClientBase):
     """Extension of APIClientBase with service registration method."""
 
     def register_service(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new service by making a POST request.
@@ -38,7 +36,7 @@ class APIClientServiceRegister(APIClientBase):
         """
         url = f"{self.base_url}/services"
         params = {"server": server}
-        
+
         try:
             response = self.session.post(url, json=data, params=params)
             response.raise_for_status()
@@ -49,7 +47,7 @@ class APIClientServiceRegister(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             # Custom handling for common errors
             if "owner_org must be 'services'" in error_detail:
                 raise ValueError(

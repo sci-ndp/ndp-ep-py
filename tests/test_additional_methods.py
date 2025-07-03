@@ -38,9 +38,9 @@ class TestDeleteMethods:
             m.delete(
                 "http://example.com/organization/test_org",
                 json={"message": "Organization deleted successfully"},
-                status_code=200
+                status_code=200,
             )
-            
+
             result = delete_org_client.delete_organization("test_org")
             assert "deleted successfully" in result["message"]
 
@@ -50,9 +50,9 @@ class TestDeleteMethods:
             m.delete(
                 "http://example.com/organization/nonexistent",
                 json={"detail": "Organization not found"},
-                status_code=404
+                status_code=404,
             )
-            
+
             with pytest.raises(ValueError, match="Not found"):
                 delete_org_client.delete_organization("nonexistent")
 
@@ -62,10 +62,12 @@ class TestDeleteMethods:
             m.delete(
                 "http://example.com/resource",
                 json={"message": "Resource deleted successfully"},
-                status_code=200
+                status_code=200,
             )
-            
-            result = delete_resource_client.delete_resource_by_id("resource123")
+
+            result = delete_resource_client.delete_resource_by_id(
+                "resource123"
+            )
             assert "deleted successfully" in result["message"]
 
     def test_delete_resource_by_name_success(self, delete_resource_client):
@@ -74,10 +76,12 @@ class TestDeleteMethods:
             m.delete(
                 "http://example.com/resource/test_resource",
                 json={"message": "Resource deleted successfully"},
-                status_code=200
+                status_code=200,
             )
-            
-            result = delete_resource_client.delete_resource_by_name("test_resource")
+
+            result = delete_resource_client.delete_resource_by_name(
+                "test_resource"
+            )
             assert "deleted successfully" in result["message"]
 
 
@@ -97,12 +101,15 @@ class TestListMethods:
             m.get(
                 "http://example.com/organization",
                 json=["test_org"],
-                status_code=200
+                status_code=200,
             )
-            
+
             result = list_client.list_organizations(name="test")
             assert result == ["test_org"]
-            assert m.last_request.qs == {"server": ["global"], "name": ["test"]}
+            assert m.last_request.qs == {
+                "server": ["global"],
+                "name": ["test"],
+            }
 
 
 class TestUpdateMethods:
@@ -139,71 +146,77 @@ class TestUpdateMethods:
     def test_update_kafka_topic_success(self, update_kafka_client):
         """Test successful Kafka topic update."""
         update_data = {"dataset_title": "Updated Title"}
-        
+
         with requests_mock.Mocker() as m:
             m.put(
                 "http://example.com/kafka/kafka123",
                 json={"message": "Kafka dataset updated successfully"},
-                status_code=200
+                status_code=200,
             )
-            
-            result = update_kafka_client.update_kafka_topic("kafka123", update_data)
+
+            result = update_kafka_client.update_kafka_topic(
+                "kafka123", update_data
+            )
             assert "updated successfully" in result["message"]
 
     def test_update_s3_resource_success(self, update_s3_client):
         """Test successful S3 resource update."""
         update_data = {"resource_title": "Updated S3 Title"}
-        
+
         with requests_mock.Mocker() as m:
             m.put(
                 "http://example.com/s3/s3123",
                 json={"message": "S3 resource updated successfully"},
-                status_code=200
+                status_code=200,
             )
-            
+
             result = update_s3_client.update_s3_resource("s3123", update_data)
             assert "updated successfully" in result["message"]
 
     def test_update_url_resource_success(self, update_url_client):
         """Test successful URL resource update."""
         update_data = {"resource_title": "Updated URL Title"}
-        
+
         with requests_mock.Mocker() as m:
             m.put(
                 "http://example.com/url/url123",
                 json={"message": "Resource updated successfully"},
-                status_code=200
+                status_code=200,
             )
-            
-            result = update_url_client.update_url_resource("url123", update_data)
+
+            result = update_url_client.update_url_resource(
+                "url123", update_data
+            )
             assert "updated successfully" in result["message"]
 
     def test_update_url_resource_reserved_key_error(self, update_url_client):
         """Test URL resource update with reserved key error."""
         update_data = {"resource_name": "reserved_name"}
-        
+
         with requests_mock.Mocker() as m:
             m.put(
                 "http://example.com/url/url123",
                 json={"detail": "Reserved key error"},
-                status_code=400
+                status_code=400,
             )
-            
+
             with pytest.raises(ValueError, match="Reserved key error"):
                 update_url_client.update_url_resource("url123", update_data)
 
     def test_patch_general_dataset_success(self, update_dataset_client):
         """Test successful dataset patch."""
         patch_data = {"notes": "Updated notes"}
-        
+
         with requests_mock.Mocker() as m:
             m.patch(
                 "http://example.com/dataset/dataset123",
                 json={"message": "Dataset updated successfully"},
-                status_code=200
+                status_code=200,
             )
-            
-            result = update_dataset_client.patch_general_dataset("dataset123", patch_data)
+
+            result = update_dataset_client.patch_general_dataset(
+                "dataset123", patch_data
+            )
             assert "updated successfully" in result["message"]
 
 
@@ -229,57 +242,57 @@ class TestSystemMethods:
         expected_details = {
             "kafka_host": "kafka.example.com",
             "kafka_port": 9092,
-            "kafka_connection": "active"
+            "kafka_connection": "active",
         }
-        
+
         with requests_mock.Mocker() as m:
             m.get(
                 "http://example.com/status/kafka-details",
                 json=expected_details,
-                status_code=200
+                status_code=200,
             )
-            
+
             result = kafka_client.get_kafka_details()
             assert result == expected_details
 
     def test_get_system_status_success(self, system_client):
         """Test successful system status retrieval."""
         expected_status = {"status": "healthy", "services": {"ckan": "up"}}
-        
+
         with requests_mock.Mocker() as m:
             m.get(
                 "http://example.com/status/",
                 json=expected_status,
-                status_code=200
+                status_code=200,
             )
-            
+
             result = system_client.get_system_status()
             assert result == expected_status
 
     def test_get_system_metrics_success(self, system_client):
         """Test successful system metrics retrieval."""
         expected_metrics = {"cpu_usage": 45.2, "memory_usage": 67.8}
-        
+
         with requests_mock.Mocker() as m:
             m.get(
                 "http://example.com/status/metrics",
                 json=expected_metrics,
-                status_code=200
+                status_code=200,
             )
-            
+
             result = system_client.get_system_metrics()
             assert result == expected_metrics
 
     def test_get_jupyter_details_success(self, system_client):
         """Test successful Jupyter details retrieval."""
         expected_details = {"jupyter_url": "http://jupyter.example.com"}
-        
+
         with requests_mock.Mocker() as m:
             m.get(
                 "http://example.com/status/jupyter",
                 json=expected_details,
-                status_code=200
+                status_code=200,
             )
-            
+
             result = system_client.get_jupyter_details()
             assert result == expected_details

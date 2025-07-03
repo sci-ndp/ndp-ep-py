@@ -10,9 +10,7 @@ class APIClientDatasetRegister(APIClientBase):
     """Extension of APIClientBase with general dataset registration method."""
 
     def register_general_dataset(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new general dataset by making a POST request.
@@ -40,7 +38,7 @@ class APIClientDatasetRegister(APIClientBase):
         """
         url = f"{self.base_url}/dataset"
         params = {"server": server}
-        
+
         try:
             response = self.session.post(url, json=data, params=params)
             response.raise_for_status()
@@ -51,7 +49,7 @@ class APIClientDatasetRegister(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             # Custom handling for common errors
             if "Server is not configured" in error_detail:
                 raise ValueError(

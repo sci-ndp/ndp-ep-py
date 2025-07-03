@@ -10,9 +10,7 @@ class APIClientS3Register(APIClientBase):
     """Extension of APIClientBase with S3 link registration method."""
 
     def register_s3_link(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new S3 link by making a POST request.
@@ -46,7 +44,7 @@ class APIClientS3Register(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             # Specific error for organization existence
             if "Organization does not exist" in error_detail:
                 raise ValueError(

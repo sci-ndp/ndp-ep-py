@@ -10,10 +10,7 @@ class APIClientS3Update(APIClientBase):
     """Extension of APIClientBase with S3 resource update method."""
 
     def update_s3_resource(
-        self,
-        resource_id: str,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, resource_id: str, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Update an existing S3 resource by making a PUT request.
@@ -46,7 +43,7 @@ class APIClientS3Update(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "S3 resource not found" in error_detail:
                 raise ValueError("Error updating S3 resource: Not found")
             else:

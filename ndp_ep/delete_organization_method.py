@@ -10,9 +10,7 @@ class APIClientOrganizationDelete(APIClientBase):
     """Extension of APIClientBase with organization deletion method."""
 
     def delete_organization(
-        self,
-        organization_name: str,
-        server: str = "local"
+        self, organization_name: str, server: str = "local"
     ) -> Dict[str, Any]:
         """
         Delete an organization by making a DELETE request.
@@ -39,7 +37,7 @@ class APIClientOrganizationDelete(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Organization not found" in error_detail:
                 raise ValueError("Error deleting organization: Not found")
             else:

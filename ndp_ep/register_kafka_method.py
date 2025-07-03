@@ -10,9 +10,7 @@ class APIClientKafkaRegister(APIClientBase):
     """Extension of APIClientBase with Kafka topic registration method."""
 
     def register_kafka_topic(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new Kafka topic by making a POST request.
@@ -49,7 +47,7 @@ class APIClientKafkaRegister(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Organization does not exist" in error_detail:
                 raise ValueError(
                     "Error creating Kafka dataset: Organization "

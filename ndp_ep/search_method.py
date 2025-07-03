@@ -13,7 +13,7 @@ class APIClientSearch(APIClientBase):
         self,
         terms: List[str],
         keys: Optional[List[Optional[str]]] = None,
-        server: str = "global"
+        server: str = "global",
     ) -> List[Dict[str, Any]]:
         """
         Search datasets by a list of terms with optional key specifications.
@@ -59,7 +59,9 @@ class APIClientSearch(APIClientBase):
                 error_detail = str(e)
             raise ValueError(f"Error searching for datasets: {error_detail}")
 
-    def advanced_search(self, search_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def advanced_search(
+        self, search_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """
         Perform an advanced search using the POST /search endpoint.
 

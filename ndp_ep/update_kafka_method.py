@@ -10,10 +10,7 @@ class APIClientKafkaUpdate(APIClientBase):
     """Extension of APIClientBase with Kafka topic update method."""
 
     def update_kafka_topic(
-        self,
-        dataset_id: str,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, dataset_id: str, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Update an existing Kafka topic by making a PUT request.
@@ -50,7 +47,7 @@ class APIClientKafkaUpdate(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Kafka dataset not found" in error_detail:
                 raise ValueError("Error updating Kafka dataset: Not found")
             else:

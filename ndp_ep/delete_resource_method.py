@@ -10,9 +10,7 @@ class APIClientResourceDelete(APIClientBase):
     """Extension of APIClientBase with resource deletion methods."""
 
     def delete_resource_by_id(
-        self,
-        resource_id: str,
-        server: str = "local"
+        self, resource_id: str, server: str = "local"
     ) -> Dict[str, Any]:
         """
         Delete a resource by its ID by making a DELETE request.
@@ -39,16 +37,14 @@ class APIClientResourceDelete(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Resource not found" in error_detail:
                 raise ValueError("Error deleting resource: Not found")
             else:
                 raise ValueError(f"Error deleting resource: {error_detail}")
 
     def delete_resource_by_name(
-        self,
-        resource_name: str,
-        server: str = "local"
+        self, resource_name: str, server: str = "local"
     ) -> Dict[str, Any]:
         """
         Delete a resource by its name by making a DELETE request.
@@ -75,7 +71,7 @@ class APIClientResourceDelete(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Resource not found" in error_detail:
                 raise ValueError("Error deleting resource: Not found")
             else:

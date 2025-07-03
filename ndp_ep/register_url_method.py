@@ -10,9 +10,7 @@ class APIClientURLRegister(APIClientBase):
     """Extension of APIClientBase with URL resource registration method."""
 
     def register_url(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new URL resource by making a POST request.
@@ -48,7 +46,7 @@ class APIClientURLRegister(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             # Custom handling for common errors
             if "Organization does not exist" in error_detail:
                 raise ValueError(

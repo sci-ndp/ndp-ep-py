@@ -10,9 +10,7 @@ class APIClientOrganizationList(APIClientBase):
     """Extension of APIClientBase with method to list organizations."""
 
     def list_organizations(
-        self,
-        name: Optional[str] = None,
-        server: str = "global"
+        self, name: Optional[str] = None, server: str = "global"
     ) -> List[str]:
         """
         List all organizations with optional name filtering and server selection.

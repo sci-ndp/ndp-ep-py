@@ -31,11 +31,9 @@ class APIClientKafkaDetails(APIClientBase):
             ) from http_err
         except requests.exceptions.RequestException as req_err:
             raise ValueError(
-                "An error occurred while fetching Kafka "
-                f"details: {req_err}"
+                "An error occurred while fetching Kafka " f"details: {req_err}"
             ) from req_err
         except ValueError as json_err:
             raise ValueError(
-                "An error occurred while parsing Kafka "
-                f"details: {json_err}"
+                "An error occurred while parsing Kafka " f"details: {json_err}"
             ) from json_err

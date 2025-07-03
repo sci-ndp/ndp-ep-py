@@ -10,9 +10,7 @@ class APIClientOrganizationRegister(APIClientBase):
     """Extension of APIClientBase with organization registration method."""
 
     def register_organization(
-        self,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Register a new organization by making a POST request.
@@ -22,7 +20,7 @@ class APIClientOrganizationRegister(APIClientBase):
                 - name: The unique name of the organization
                 - title: The title of the organization
                 - description: Optional description of the organization
-            server: CKAN instance ("local" or "pre_ckan"). 
+            server: CKAN instance ("local" or "pre_ckan").
                    Defaults to "local".
 
         Returns:

@@ -10,10 +10,7 @@ class APIClientDatasetUpdate(APIClientBase):
     """Extension of APIClientBase with general dataset update methods."""
 
     def update_general_dataset(
-        self,
-        dataset_id: str,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, dataset_id: str, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Update an existing general dataset by making a PUT request.
@@ -46,17 +43,14 @@ class APIClientDatasetUpdate(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Dataset not found" in error_detail:
                 raise ValueError("Error updating dataset: Not found")
             else:
                 raise ValueError(f"Error updating dataset: {error_detail}")
 
     def patch_general_dataset(
-        self,
-        dataset_id: str,
-        data: Dict[str, Any],
-        server: str = "local"
+        self, dataset_id: str, data: Dict[str, Any], server: str = "local"
     ) -> Dict[str, Any]:
         """
         Partially update an existing general dataset by making a PATCH request.
@@ -96,7 +90,7 @@ class APIClientDatasetUpdate(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-                
+
             if "Dataset not found" in error_detail:
                 raise ValueError("Error updating dataset: Not found")
             else:
