@@ -86,10 +86,13 @@ jobs:
         path: dist/
 
   publish:
-    if: false
+    if: false  # Temporarily disabled until PyPI token is configured
     needs: [test, build]
     runs-on: ubuntu-latest
     environment: pypi
+    permissions:
+      id-token: write
+      contents: read
     steps:
     - uses: actions/checkout@v4
     
