@@ -13,6 +13,17 @@ Main Client
    :inherited-members:
    :show-inheritance:
 
+The main APIClient class provides access to all NDP EP functionality.
+
+Example usage::
+
+    from ndp_ep import APIClient
+    
+    client = APIClient(
+        base_url="http://155.101.6.191:8003",
+        token="your-token"
+    )
+
 Base Classes
 ------------
 
@@ -23,96 +34,84 @@ Base Classes
 Organization Management
 -----------------------
 
-.. autoclass:: APIClientOrganizationRegister
+.. autoclass:: ndp_ep.register_organization_method.APIClientOrganizationRegister
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientOrganizationList
+.. autoclass:: ndp_ep.list_organization_method.APIClientOrganizationList
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientOrganizationDelete
+.. autoclass:: ndp_ep.delete_organization_method.APIClientOrganizationDelete
    :members:
    :show-inheritance:
 
 Resource Registration
 ---------------------
 
-.. autoclass:: APIClientKafkaRegister
+.. autoclass:: ndp_ep.register_kafka_method.APIClientKafkaRegister
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientS3Register
+.. autoclass:: ndp_ep.register_s3_method.APIClientS3Register
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientURLRegister
+.. autoclass:: ndp_ep.register_url_method.APIClientURLRegister
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientServiceRegister
+.. autoclass:: ndp_ep.register_service_method.APIClientServiceRegister
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientDatasetRegister
+.. autoclass:: ndp_ep.register_dataset_method.APIClientDatasetRegister
    :members:
    :show-inheritance:
 
 Resource Updates
 ----------------
 
-.. autoclass:: APIClientKafkaUpdate
+.. autoclass:: ndp_ep.update_kafka_method.APIClientKafkaUpdate
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientS3Update
+.. autoclass:: ndp_ep.update_s3_method.APIClientS3Update
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientURLUpdate
+.. autoclass:: ndp_ep.update_url_method.APIClientURLUpdate
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientDatasetUpdate
-   :members:
-   :show-inheritance:
-
-Resource Deletion
------------------
-
-.. autoclass:: APIClientResourceDelete
+.. autoclass:: ndp_ep.update_dataset_method.APIClientDatasetUpdate
    :members:
    :show-inheritance:
 
 Search Functionality
 --------------------
 
-.. autoclass:: APIClientSearch
+.. autoclass:: ndp_ep.search_method.APIClientSearch
    :members:
    :show-inheritance:
 
 System Information
 ------------------
 
-.. autoclass:: APIClientKafkaDetails
+.. autoclass:: ndp_ep.get_kafka_details_method.APIClientKafkaDetails
    :members:
    :show-inheritance:
 
-.. autoclass:: APIClientSystemStatus
+.. autoclass:: ndp_ep.get_system_status_method.APIClientSystemStatus
    :members:
    :show-inheritance:
 
-Constants and Exceptions
-------------------------
+Constants and Version
+---------------------
 
-Version Information
-~~~~~~~~~~~~~~~~~~~
+.. autodata:: ndp_ep.__version__
 
-.. autodata:: __version__
-   :annotation: = "0.1.0"
-
-.. autodata:: __description__
-   :annotation: = "Python client library for NDP EP API"
+.. autodata:: ndp_ep.__description__
 
 Common Parameters
 -----------------
@@ -123,7 +122,7 @@ Server Options
 Most methods accept a ``server`` parameter with these options:
 
 - ``"local"``: Local CKAN instance
-- ``"global"``: Global CKAN instance  
+- ``"global"``: Global CKAN instance (default for searches)
 - ``"pre_ckan"``: Pre-production CKAN instance
 
 Authentication
@@ -131,17 +130,13 @@ Authentication
 
 The client supports two authentication methods:
 
-1. **Token-based** (recommended):
-   
-   .. code-block:: python
-   
-      client = APIClient(base_url="...", token="your-token")
+**Token-based (recommended)**::
 
-2. **Username/Password**:
-   
-   .. code-block:: python
-   
-      client = APIClient(base_url="...", username="user", password="pass")
+    client = APIClient(base_url="...", token="your-token")
+
+**Username/Password**::
+
+    client = APIClient(base_url="...", username="user", password="pass")
 
 Error Handling
 --------------
@@ -149,202 +144,19 @@ Error Handling
 All methods may raise ``ValueError`` with descriptive error messages for:
 
 - Authentication failures
-- Network connectivity issues
+- Network connectivity issues  
 - API validation errors
 - Resource not found errors
 - Server configuration errors
 
-Example error handling:
+Example error handling::
 
-.. code-block:: python
-
-   try:
-       result = client.register_organization(org_data)
-   except ValueError as e:
-       if "already exists" in str(e):
-           print("Organization name is taken")
-       elif "Authentication failed" in str(e):
-           print("Check your credentials")
-       else:
-           print(f"API error: {e}")
-
-Data Structures
----------------
-
-Organization Data
-~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   org_data = {
-       "name": "unique_org_name",        # Required: lowercase, no spaces
-       "title": "Organization Title",     # Required: display name
-       "description": "Optional description"  # Optional
-   }
-
-URL Resource Data
-~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   url_data = {
-       "resource_name": "unique_resource_name",  # Required
-       "resource_title": "Resource Title",       # Required
-       "owner_org": "organization_name",         # Required
-       "resource_url": "https://example.com/data.csv",  # Required
-       "file_type": "CSV",                       # Optional: CSV, JSON, etc.
-       "notes": "Description of the resource",   # Optional
-       "extras": {"key": "value"},               # Optional metadata
-       "mapping": {"field": "mapping"},          # Optional
-       "processing": {"type": "batch"}           # Optional
-   }
-
-S3 Resource Data
-~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   s3_data = {
-       "resource_name": "unique_s3_name",        # Required
-       "resource_title": "S3 Resource Title",   # Required  
-       "owner_org": "organization_name",         # Required
-       "resource_s3": "s3://bucket/path/file",   # Required
-       "notes": "Description",                   # Optional
-       "extras": {"key": "value"}                # Optional metadata
-   }
-
-Kafka Topic Data
-~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   kafka_data = {
-       "dataset_name": "unique_dataset_name",    # Required
-       "dataset_title": "Dataset Title",        # Required
-       "owner_org": "organization_name",         # Required
-       "kafka_topic": "topic-name",             # Required
-       "kafka_host": "kafka.example.com",       # Required
-       "kafka_port": "9092",                    # Required
-       "dataset_description": "Description",     # Optional
-       "extras": {"key": "value"},              # Optional metadata
-       "mapping": {"field": "mapping"},         # Optional
-       "processing": {"format": "JSON"}         # Optional
-   }
-
-Service Data
-~~~~~~~~~~~~
-
-.. code-block:: python
-
-   service_data = {
-       "service_name": "unique_service_name",    # Required
-       "service_title": "Service Title",        # Required
-       "owner_org": "services",                 # Required: must be "services"
-       "service_url": "https://api.example.com", # Required
-       "service_type": "REST API",              # Optional
-       "notes": "Service description",          # Optional
-       "extras": {"version": "1.0"},           # Optional metadata
-       "health_check_url": "https://api.example.com/health",  # Optional
-       "documentation_url": "https://docs.example.com"        # Optional
-   }
-
-General Dataset Data
-~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   dataset_data = {
-       "name": "unique_dataset_name",           # Required: lowercase, no spaces
-       "title": "Dataset Title",               # Required
-       "owner_org": "organization_name",        # Required
-       "notes": "Dataset description",          # Optional
-       "tags": [{"name": "tag1"}, {"name": "tag2"}],  # Optional
-       "license_id": "cc-by",                  # Optional
-       "version": "1.0",                       # Optional
-       "private": False,                       # Optional: default False
-       "extras": {"key": "value"},             # Optional metadata
-       "resources": [                          # Optional: list of resources
-           {
-               "name": "resource_name",
-               "description": "Resource description", 
-               "format": "CSV",
-               "url": "https://example.com/data.csv"
-           }
-       ]
-   }
-
-Search Request Data
-~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   # Simple search
-   terms = ["climate", "temperature"]
-   keys = ["title", None]  # Search in title field and globally
-   
-   # Advanced search
-   search_data = {
-       "dataset_name": "partial_name",          # Optional
-       "resource_url": "partial_url",          # Optional
-       "search_term": "term1,term2",           # Optional: comma-separated
-       "filter_list": [                        # Optional
-           "format:CSV",
-           "owner_org:research"
-       ],
-       "server": "global"                      # Required
-   }
-
-Response Formats
-----------------
-
-Most registration methods return:
-
-.. code-block:: python
-
-   {
-       "id": "generated-resource-id",
-       "message": "Success message"
-   }
-
-Search methods return a list of dataset objects:
-
-.. code-block:: python
-
-   [
-       {
-           "id": "dataset-id",
-           "name": "dataset-name", 
-           "title": "Dataset Title",
-           "notes": "Description",
-           "organization": {
-               "id": "org-id",
-               "name": "org-name",
-               "title": "Organization Title"
-           },
-           "resources": [
-               {
-                   "id": "resource-id",
-                   "name": "resource-name",
-                   "url": "resource-url",
-                   "format": "CSV"
-               }
-           ],
-           "tags": [
-               {"name": "tag1"},
-               {"name": "tag2"}
-           ]
-       }
-   ]
-
-System status methods return health information:
-
-.. code-block:: python
-
-   {
-       "status": "healthy",
-       "services": {
-           "ckan": "active",
-           "keycloak": "active"
-       },
-       "timestamp": "2024-01-01T12:00:00Z"
-   }
+    try:
+        result = client.register_organization(org_data)
+    except ValueError as e:
+        if "already exists" in str(e):
+            print("Organization name is taken")
+        elif "Authentication failed" in str(e):
+            print("Check your credentials")
+        else:
+            print(f"API error: {e}")
