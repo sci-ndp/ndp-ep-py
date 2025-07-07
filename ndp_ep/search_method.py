@@ -75,7 +75,7 @@ class APIClientSearch(APIClientBase):
 
                     {
                         "dataset_name": "...",
-                        "resource_url": "...", 
+                        "resource_url": "...",
                         "search_term": "...",
                         "filter_list": [...],
                         "server": "local"
