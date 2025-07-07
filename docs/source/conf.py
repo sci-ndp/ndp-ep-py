@@ -1,8 +1,8 @@
-# Configuration file for the Sphinx documentation builder.
+# Configuration file for Sphinx documentation on GitHub Pages
 import os
 import sys
 
-# Add the project root to Python path
+# Add project root to Python path
 sys.path.insert(0, os.path.abspath('../..'))
 
 # Project information
@@ -12,7 +12,7 @@ author = 'NDP EP Team'
 release = '0.1.0'
 version = '0.1.0'
 
-# Extensions - keep minimal for RTD compatibility
+# Extensions - minimal set for GitHub Pages
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -24,14 +24,14 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-# HTML output options
+# HTML output
 html_theme = 'sphinx_rtd_theme'
 html_static_path = []
 
-# Theme options
+# GitHub Pages specific settings
+html_baseurl = 'https://sci-ndp.github.io/ndp-ep-py/'
 html_theme_options = {
-    'canonical_url': '',
-    'analytics_id': '',
+    'canonical_url': html_baseurl,
     'logo_only': False,
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
@@ -43,18 +43,11 @@ html_theme_options = {
     'titles_only': False
 }
 
-# Napoleon settings for Google/NumPy style docstrings
+# Napoleon settings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
 napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
-napoleon_use_admonition_for_examples = False
-napoleon_use_admonition_for_notes = False
-napoleon_use_admonition_for_references = False
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
 
 # Autodoc settings
 autodoc_default_options = {
@@ -63,14 +56,11 @@ autodoc_default_options = {
     'show-inheritance': True,
 }
 
-# Mock imports for packages that might not be available during build
+# Mock imports for modules that might not be available during build
 autodoc_mock_imports = []
 
 # Suppress warnings
-suppress_warnings = ['toc.not_readable', 'ref.any']
+suppress_warnings = ['toc.not_readable']
 
 # Master document
 master_doc = 'index'
-
-# Language
-language = 'en'
