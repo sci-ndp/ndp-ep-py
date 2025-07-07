@@ -69,7 +69,7 @@ Search for Datasets
        print(f"- {dataset.get('title', 'No title')}")
 
 Check System Status
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 

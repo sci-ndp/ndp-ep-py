@@ -71,14 +71,15 @@ class APIClientSearch(APIClientBase):
 
         Args:
             search_data: A dict matching the 'SearchRequest' model,
-                for example:
-                {
-                    "dataset_name": "...",
-                    "resource_url": "...",
-                    "search_term": "...",
-                    "filter_list": [...],
-                    "server": "local"
-                }
+                for example::
+
+                    {
+                        "dataset_name": "...",
+                        "resource_url": "...", 
+                        "search_term": "...",
+                        "filter_list": [...],
+                        "server": "local"
+                    }
 
         Returns:
             A list of matching datasets.

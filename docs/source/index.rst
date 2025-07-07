@@ -44,8 +44,8 @@ Basic usage:
        server="global"
    )
 
-Table of Contents
------------------
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 2
@@ -54,6 +54,12 @@ Table of Contents
    installation
    quickstart
    authentication
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
+
+   user_guide/organizations
 
 .. toctree::
    :maxdepth: 2

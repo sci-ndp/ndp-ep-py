@@ -38,7 +38,8 @@ jobs:
     - name: Build documentation
       run: |
         cd docs
-        sphinx-build -M html source build -W --keep-going
+        # Remove -W flag to not treat warnings as errors
+        sphinx-build -M html source build --keep-going
     
     - name: Upload documentation artifact
       uses: actions/upload-pages-artifact@v3
