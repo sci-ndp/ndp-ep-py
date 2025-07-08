@@ -70,6 +70,11 @@ service_data = {
 response = client.register_service(service_data)
 ```
 
+### More Examples
+
+For comprehensive examples and use cases, check out our:
+- **📓 [Quick start](docs/source/tutorials/getting_started.ipynb)** 
+
 ## API Coverage
 
 ### Authentication
