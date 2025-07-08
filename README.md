@@ -74,6 +74,7 @@ response = client.register_service(service_data)
 
 For comprehensive examples and use cases, check out our:
 - **📓 [Quick start](docs/source/tutorials/getting_started.ipynb)** 
+- **📓 [Bulk Resource Management](docs/source/tutorials/bulk_resource_management.ipynb)** 
 
 ## API Coverage
 
