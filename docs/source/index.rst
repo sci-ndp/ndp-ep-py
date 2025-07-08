@@ -16,33 +16,26 @@ Features
 Quick Start
 -----------
 
-Install the library:
+**Try our interactive tutorial first!**
 
-.. code-block:: bash
+.. raw:: html
 
-   pip install ndp-ep
+   <p>
+   <a href="https://colab.research.google.com/github/sci-ndp/ndp-ep-py/blob/main/docs/source/tutorials/getting_started.ipynb" target="_blank">
+   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+   </a>
+   <a href="https://mybinder.org/v2/gh/sci-ndp/ndp-ep-py/main?filepath=docs%2Fsource%2Ftutorials%2Fgetting_started.ipynb" target="_blank">
+   <img src="https://mybinder.org/badge_logo.svg" alt="Binder"/>
+   </a>
+   </p>
 
-Basic usage:
+The tutorial includes:
 
-.. code-block:: python
-
-   from ndp_ep import APIClient
-
-   # Initialize client with token
-   client = APIClient(
-       base_url="http://155.101.6.191:8003",
-       token="your-access-token"
-   )
-
-   # List organizations
-   organizations = client.list_organizations()
-   print(organizations)
-
-   # Search datasets
-   results = client.search_datasets(
-       terms=["climate", "temperature"],
-       server="global"
-   )
+* 🔧 **Client setup and authentication** - Secure token configuration
+* 🏢 **Working with organizations** - Create and manage data containers
+* 🔍 **Searching datasets** - Simple and advanced search techniques  
+* 📊 **Registering resources** - URL, S3, and Kafka topic registration
+* 🛡️ **Error handling** - Best practices for robust applications
 
 Documentation
 -------------
