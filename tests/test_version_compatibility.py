@@ -1,17 +1,18 @@
 """Tests for API version compatibility checking functionality."""
 
-import pytest
-import requests
-import requests_mock
 import warnings
 from unittest.mock import patch
 
+import pytest
+import requests
+import requests_mock
+
 from ndp_ep.client_base import APIClientBase
 from ndp_ep.version_config import (
-    parse_version,
-    is_version_compatible,
+    MINIMUM_API_VERSION,
     get_minimum_version,
-    MINIMUM_API_VERSION
+    is_version_compatible,
+    parse_version,
 )
 
 
@@ -28,13 +29,13 @@ class TestVersionConfig:
         """Test parsing invalid version strings."""
         with pytest.raises(ValueError, match="Invalid version format"):
             parse_version("1.2")
-        
+
         with pytest.raises(ValueError, match="Invalid version format"):
             parse_version("1.2.3.4")
-            
+
         with pytest.raises(ValueError, match="Invalid version format"):
             parse_version("1.a.3")
-            
+
         with pytest.raises(ValueError, match="Invalid version format"):
             parse_version("")
 
@@ -76,13 +77,15 @@ class TestAPIVersionChecking:
             m.get(
                 f"{mock_api_base}/status/",
                 json={"version": "1.0.0"},
-                status_code=200
+                status_code=200,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version == "1.0.0"
                 assert len(w) == 0  # No warnings should be issued
 
@@ -95,13 +98,15 @@ class TestAPIVersionChecking:
             m.get(
                 f"{mock_api_base}/status/",
                 json={"version": "0.0.1"},
-                status_code=200
+                status_code=200,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version == "0.0.1"
                 assert len(w) == 1
                 assert issubclass(w[0].category, UserWarning)
@@ -118,13 +123,15 @@ class TestAPIVersionChecking:
             m.get(
                 f"{mock_api_base}/status/",
                 json={"status": "healthy"},
-                status_code=200
+                status_code=200,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version is None
                 assert len(w) == 1
                 assert issubclass(w[0].category, UserWarning)
@@ -136,7 +143,7 @@ class TestAPIVersionChecking:
             {"api_version": "1.1.0"},
             {"app_version": "1.2.0"},
         ]
-        
+
         for version_data in test_cases:
             with requests_mock.Mocker() as m:
                 # Mock initial connection check
@@ -145,13 +152,15 @@ class TestAPIVersionChecking:
                 m.get(
                     f"{mock_api_base}/status/",
                     json=version_data,
-                    status_code=200
+                    status_code=200,
                 )
-                
+
                 with warnings.catch_warnings(record=True) as w:
                     warnings.simplefilter("always")
-                    client = APIClientBase(base_url=mock_api_base, token="test-token")
-                    
+                    client = APIClientBase(
+                        base_url=mock_api_base, token="test-token"
+                    )
+
                     expected_version = list(version_data.values())[0]
                     assert client.api_version == expected_version
                     assert len(w) == 0  # Compatible versions
@@ -164,14 +173,16 @@ class TestAPIVersionChecking:
             # Mock status endpoint with network error
             m.get(
                 f"{mock_api_base}/status/",
-                exc=requests.exceptions.ConnectionError
+                exc=requests.exceptions.ConnectionError,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 # Should not raise exception, just silently handle error
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version is None
                 assert len(w) == 0  # Network errors are handled silently
 
@@ -182,12 +193,14 @@ class TestAPIVersionChecking:
             m.get(mock_api_base, status_code=200)
             # Mock status endpoint with HTTP error
             m.get(f"{mock_api_base}/status/", status_code=500)
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 # Should not raise exception, just silently handle error
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version is None
                 assert len(w) == 0  # HTTP errors are handled silently
 
@@ -198,12 +211,14 @@ class TestAPIVersionChecking:
             m.get(mock_api_base, status_code=200)
             # Mock status endpoint with invalid JSON
             m.get(f"{mock_api_base}/status/", text="invalid json")
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 # Should not raise exception, just silently handle error
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version is None
                 assert len(w) == 0  # JSON errors are handled silently
 
@@ -216,23 +231,21 @@ class TestAPIVersionChecking:
             m.post(
                 f"{mock_api_base}/token",
                 json={"access_token": "test-token"},
-                status_code=200
+                status_code=200,
             )
             # Mock status endpoint
             m.get(
                 f"{mock_api_base}/status/",
                 json={"version": "1.0.0"},
-                status_code=200
+                status_code=200,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 client = APIClientBase(
-                    base_url=mock_api_base,
-                    username="user",
-                    password="pass"
+                    base_url=mock_api_base, username="user", password="pass"
                 )
-                
+
                 assert client.api_version == "1.0.0"
                 assert len(w) == 0
 
@@ -241,15 +254,20 @@ class TestAPIVersionChecking:
         with requests_mock.Mocker() as m:
             # Mock initial connection check only
             m.get(mock_api_base, status_code=200)
-            
+
             client = APIClientBase(base_url=mock_api_base)
-            
+
             assert client.api_version is None
             assert client.token is None
             # Status endpoint should not have been called
-            assert len([req for req in m.request_history if "/status/" in req.url]) == 0
+            assert (
+                len(
+                    [req for req in m.request_history if "/status/" in req.url]
+                )
+                == 0
+            )
 
-    @patch('ndp_ep.version_config.MINIMUM_API_VERSION', '2.0.0')
+    @patch("ndp_ep.version_config.MINIMUM_API_VERSION", "2.0.0")
     def test_version_check_with_different_minimum(self, mock_api_base):
         """Test version check with different minimum version."""
         with requests_mock.Mocker() as m:
@@ -259,13 +277,15 @@ class TestAPIVersionChecking:
             m.get(
                 f"{mock_api_base}/status/",
                 json={"version": "1.5.0"},
-                status_code=200
+                status_code=200,
             )
-            
+
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                client = APIClientBase(base_url=mock_api_base, token="test-token")
-                
+                client = APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+
                 assert client.api_version == "1.5.0"
                 assert len(w) == 1
                 assert "2.0.0" in str(w[0].message)

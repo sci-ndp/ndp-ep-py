@@ -1,11 +1,12 @@
 """Base class for the API client."""
 
-import requests
 import warnings
 from typing import Optional
 from urllib.parse import urlparse
 
-from .version_config import is_version_compatible, get_minimum_version
+import requests
+
+from .version_config import get_minimum_version, is_version_compatible
 
 
 class APIClientBase:
@@ -110,32 +111,33 @@ class APIClientBase:
     def _check_api_version(self) -> None:
         """
         Check API version compatibility after successful authentication.
-        
+
         Makes a GET request to /status endpoint to retrieve API version
         and compares it with the minimum required version. Shows warning
         if version is incompatible but allows client to continue.
-        
+
         Note: This method makes an unauthenticated request to /status/
         since that endpoint should be publicly accessible.
         """
         try:
-            # Create a temporary session without authentication headers for status check
+            # Create a temporary session without authentication headers
+            # for status check
             temp_session = requests.Session()
             response = temp_session.get(f"{self.base_url}/status/")
             response.raise_for_status()
             status_data = response.json()
-            
+
             # Try to extract version from different possible fields
             api_version = (
-                status_data.get("version") or 
-                status_data.get("api_version") or
-                status_data.get("app_version")
+                status_data.get("version")
+                or status_data.get("api_version")
+                or status_data.get("app_version")
             )
-            
+
             if api_version:
                 self.api_version = str(api_version)
                 min_version = get_minimum_version()
-                
+
                 # Check version compatibility
                 if not is_version_compatible(self.api_version, min_version):
                     warnings.warn(
@@ -145,7 +147,7 @@ class APIClientBase:
                         f"Some features may not work as expected. "
                         f"Consider updating the API server.",
                         UserWarning,
-                        stacklevel=3
+                        stacklevel=3,
                     )
             else:
                 # Version information not available in status response
@@ -153,9 +155,9 @@ class APIClientBase:
                     "Could not determine API version from status endpoint. "
                     "Version compatibility cannot be verified.",
                     UserWarning,
-                    stacklevel=3
+                    stacklevel=3,
                 )
-                
+
         except requests.exceptions.RequestException:
             # Silently handle network errors - don't block client initialization
             # Version checking is informational only

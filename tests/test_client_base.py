@@ -27,7 +27,11 @@ class TestAPIClientBase:
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
             # Mock the status endpoint for version checking
-            m.get("http://example.com/status/", json={"version": "1.0.0"}, status_code=200)
+            m.get(
+                "http://example.com/status/",
+                json={"version": "1.0.0"},
+                status_code=200,
+            )
             client = APIClientBase(
                 base_url="http://example.com", token="test-token"
             )
@@ -45,7 +49,11 @@ class TestAPIClientBase:
                 status_code=200,
             )
             # Mock the status endpoint for version checking
-            m.get("http://example.com/status/", json={"version": "1.0.0"}, status_code=200)
+            m.get(
+                "http://example.com/status/",
+                json={"version": "1.0.0"},
+                status_code=200,
+            )
             client = APIClientBase(
                 base_url="http://example.com", username="user", password="pass"
             )
@@ -112,7 +120,11 @@ class TestAPIClientBase:
                 status_code=200,
             )
             # Mock the status endpoint for version checking
-            m.get("http://example.com/status/", json={"version": "1.0.0"}, status_code=200)
+            m.get(
+                "http://example.com/status/",
+                json={"version": "1.0.0"},
+                status_code=200,
+            )
             client = APIClientBase(base_url="http://example.com")
             client.get_token("user", "pass")
             assert client.token == "new-token"
