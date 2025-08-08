@@ -1,8 +1,11 @@
 """Base class for the API client."""
 
 import requests
+import warnings
 from typing import Optional
 from urllib.parse import urlparse
+
+from .version_config import is_version_compatible, get_minimum_version
 
 
 class APIClientBase:
@@ -33,6 +36,7 @@ class APIClientBase:
 
         # Initialize token to None by default
         self.token: Optional[str] = None
+        self.api_version: Optional[str] = None
 
         # Validate input combinations
         if token and (username or password):
@@ -46,9 +50,13 @@ class APIClientBase:
             self.session.headers.update(
                 {"Authorization": f"Bearer {self.token}"}
             )
+            # Check API version after successful authentication
+            self._check_api_version()
         # Fallback to username/password authentication
         elif username and password:
             self.get_token(username, password)
+            # Check API version after successful authentication
+            self._check_api_version()
         # Check API availability if no authentication details are provided
         else:
             self._check_api_availability()
@@ -98,6 +106,59 @@ class APIClientBase:
                 "An error occurred while attempting to connect "
                 f"to the API: {req_err}"
             )
+
+    def _check_api_version(self) -> None:
+        """
+        Check API version compatibility after successful authentication.
+        
+        Makes a GET request to /status endpoint to retrieve API version
+        and compares it with the minimum required version. Shows warning
+        if version is incompatible but allows client to continue.
+        """
+        try:
+            response = self.session.get(f"{self.base_url}/status/")
+            response.raise_for_status()
+            status_data = response.json()
+            
+            # Try to extract version from different possible fields
+            api_version = (
+                status_data.get("version") or 
+                status_data.get("api_version") or
+                status_data.get("app_version")
+            )
+            
+            if api_version:
+                self.api_version = str(api_version)
+                min_version = get_minimum_version()
+                
+                # Check version compatibility
+                if not is_version_compatible(self.api_version, min_version):
+                    warnings.warn(
+                        f"API version compatibility warning: "
+                        f"Current API version ({self.api_version}) is below "
+                        f"the minimum required version ({min_version}). "
+                        f"Some features may not work as expected. "
+                        f"Consider updating the API server.",
+                        UserWarning,
+                        stacklevel=3
+                    )
+            else:
+                # Version information not available in status response
+                warnings.warn(
+                    "Could not determine API version from status endpoint. "
+                    "Version compatibility cannot be verified.",
+                    UserWarning,
+                    stacklevel=3
+                )
+                
+        except requests.exceptions.RequestException:
+            # Silently handle network errors - don't block client initialization
+            # Version checking is informational only
+            pass
+        except (ValueError, KeyError, TypeError):
+            # Silently handle JSON parsing or version format errors
+            # Version checking is informational only
+            pass
 
     def get_token(self, username: str, password: str) -> None:
         """
