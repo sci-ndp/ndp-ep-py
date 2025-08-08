@@ -1,6 +1,7 @@
 """Tests for API version compatibility checking functionality."""
 
 import pytest
+import requests
 import requests_mock
 import warnings
 from unittest.mock import patch
@@ -163,7 +164,7 @@ class TestAPIVersionChecking:
             # Mock status endpoint with network error
             m.get(
                 f"{mock_api_base}/status/",
-                exc=requests_mock.exceptions.ConnectionError
+                exc=requests.exceptions.ConnectionError
             )
             
             with warnings.catch_warnings(record=True) as w:
