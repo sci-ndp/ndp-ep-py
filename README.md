@@ -33,13 +33,6 @@ client = APIClient(
     token="your-access-token"
 )
 
-# Or with username/password
-client = APIClient(
-    base_url="https://your-api-endpoint.com",
-    username="your-username",
-    password="your-password"
-)
-
 # List organizations
 organizations = client.list_organizations()
 print(organizations)
