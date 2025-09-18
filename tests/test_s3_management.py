@@ -289,3 +289,205 @@ class TestS3ObjectsManagement:
             # Verify expiration was passed in request
             request_data = m.last_request.json()
             assert request_data["expiration"] == 3600
+
+    def test_upload_object_success(self, s3_objects_client, mock_api_base):
+        """Test successful object upload."""
+        with requests_mock.Mocker() as m:
+            expected_response = {"key": "test-file.txt", "status": "uploaded"}
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket",
+                json=expected_response,
+                status_code=201,
+            )
+
+            file_data = io.BytesIO(b"test content")
+            result = s3_objects_client.upload_object("test-bucket", "test-file.txt", file_data)
+            assert result == expected_response
+
+    def test_upload_object_with_content_type(self, s3_objects_client, mock_api_base):
+        """Test object upload with content type."""
+        with requests_mock.Mocker() as m:
+            expected_response = {"key": "test-file.csv", "status": "uploaded"}
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket",
+                json=expected_response,
+                status_code=201,
+            )
+
+            file_data = io.BytesIO(b"col1,col2\nval1,val2")
+            result = s3_objects_client.upload_object(
+                "test-bucket", "test-file.csv", file_data, content_type="text/csv"
+            )
+            assert result == expected_response
+
+    def test_upload_object_error(self, s3_objects_client, mock_api_base):
+        """Test object upload error handling."""
+        with requests_mock.Mocker() as m:
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket",
+                json={"detail": "Upload failed"},
+                status_code=400,
+            )
+
+            file_data = io.BytesIO(b"test content")
+            with pytest.raises(ValueError, match="Error uploading S3 object"):
+                s3_objects_client.upload_object("test-bucket", "test-file.txt", file_data)
+
+    def test_upload_object_error_no_json(self, s3_objects_client, mock_api_base):
+        """Test object upload error with non-JSON response."""
+        with requests_mock.Mocker() as m:
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket",
+                text="Server error",
+                status_code=500,
+            )
+
+            file_data = io.BytesIO(b"test content")
+            with pytest.raises(ValueError, match="Error uploading S3 object"):
+                s3_objects_client.upload_object("test-bucket", "test-file.txt", file_data)
+
+    def test_list_objects_error(self, s3_objects_client, mock_api_base):
+        """Test objects listing error handling."""
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{mock_api_base}/s3/objects/test-bucket",
+                json={"detail": "Bucket not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(ValueError, match="Error listing S3 objects"):
+                s3_objects_client.list_objects("test-bucket")
+
+    def test_delete_object_not_found(self, s3_objects_client, mock_api_base):
+        """Test object deletion when object doesn't exist."""
+        with requests_mock.Mocker() as m:
+            m.delete(
+                f"{mock_api_base}/s3/objects/test-bucket/nonexistent.txt",
+                json={"detail": "Object not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(
+                ValueError, match="S3 object 'nonexistent.txt' not found in bucket 'test-bucket'"
+            ):
+                s3_objects_client.delete_object("test-bucket", "nonexistent.txt")
+
+    def test_get_object_metadata_not_found(self, s3_objects_client, mock_api_base):
+        """Test object metadata when object doesn't exist."""
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{mock_api_base}/s3/objects/test-bucket/nonexistent.txt/metadata",
+                json={"detail": "Object not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(
+                ValueError, match="S3 object 'nonexistent.txt' not found in bucket 'test-bucket'"
+            ):
+                s3_objects_client.get_object_metadata("test-bucket", "nonexistent.txt")
+
+    def test_get_object_metadata_error(self, s3_objects_client, mock_api_base):
+        """Test object metadata error handling."""
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/metadata",
+                json={"detail": "Access denied"},
+                status_code=403,
+            )
+
+            with pytest.raises(ValueError, match="Error getting S3 object metadata"):
+                s3_objects_client.get_object_metadata("test-bucket", "test-file.txt")
+
+    def test_generate_presigned_upload_url_error(self, s3_objects_client, mock_api_base):
+        """Test presigned upload URL generation error."""
+        with requests_mock.Mocker() as m:
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-upload",
+                json={"detail": "Access denied"},
+                status_code=403,
+            )
+
+            with pytest.raises(ValueError, match="Error generating presigned upload URL"):
+                s3_objects_client.generate_presigned_upload_url("test-bucket", "test-file.txt")
+
+    def test_generate_presigned_download_url_error(self, s3_objects_client, mock_api_base):
+        """Test presigned download URL generation error."""
+        with requests_mock.Mocker() as m:
+            m.post(
+                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-download",
+                json={"detail": "Access denied"},
+                status_code=403,
+            )
+
+            with pytest.raises(ValueError, match="Error generating presigned download URL"):
+                s3_objects_client.generate_presigned_download_url("test-bucket", "test-file.txt")
+
+    def test_download_object_error(self, s3_objects_client, mock_api_base):
+        """Test object download error handling."""
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt",
+                json={"detail": "Access denied"},
+                status_code=403,
+            )
+
+            with pytest.raises(ValueError, match="Error downloading S3 object"):
+                s3_objects_client.download_object("test-bucket", "test-file.txt")
+
+
+class TestS3BucketsErrorHandling:
+    """Additional test cases for S3 buckets error handling."""
+
+    @pytest.fixture
+    def mock_api_base(self):
+        """Mock the base API URL for testing."""
+        return "http://example.com"
+
+    @pytest.fixture
+    def s3_buckets_client(self, mock_api_base):
+        """Create S3 buckets client for testing."""
+        with requests_mock.Mocker() as m:
+            m.get(mock_api_base, status_code=200)
+            m.get(
+                f"{mock_api_base}/status/",
+                json={"version": "0.2.0"},
+                status_code=200,
+            )
+            return APIClientS3Buckets(base_url=mock_api_base, token="test-token")
+
+    def test_create_bucket_with_options(self, s3_buckets_client, mock_api_base):
+        """Test bucket creation with additional options."""
+        with requests_mock.Mocker() as m:
+            expected_response = {"name": "test-bucket", "status": "created", "region": "us-east-1"}
+            m.post(f"{mock_api_base}/s3/buckets/", json=expected_response, status_code=201)
+
+            result = s3_buckets_client.create_bucket("test-bucket", region="us-east-1")
+            assert result == expected_response
+            # Verify the additional parameter was sent
+            request_data = m.last_request.json()
+            assert request_data["bucket_name"] == "test-bucket"
+            assert request_data["region"] == "us-east-1"
+
+    def test_get_bucket_info_error(self, s3_buckets_client, mock_api_base):
+        """Test bucket info error handling."""
+        with requests_mock.Mocker() as m:
+            m.get(
+                f"{mock_api_base}/s3/buckets/test-bucket",
+                json={"detail": "Access denied"},
+                status_code=403,
+            )
+
+            with pytest.raises(ValueError, match="Error getting S3 bucket info"):
+                s3_buckets_client.get_bucket_info("test-bucket")
+
+    def test_delete_bucket_error(self, s3_buckets_client, mock_api_base):
+        """Test bucket deletion error handling."""
+        with requests_mock.Mocker() as m:
+            m.delete(
+                f"{mock_api_base}/s3/buckets/test-bucket",
+                json={"detail": "Bucket not empty"},
+                status_code=409,
+            )
+
+            with pytest.raises(ValueError, match="Error deleting S3 bucket"):
+                s3_buckets_client.delete_bucket("test-bucket")
