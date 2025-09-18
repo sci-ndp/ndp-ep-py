@@ -1,6 +1,6 @@
 """S3 objects management functionality."""
 
-from typing import Any, Dict, List, Optional, BinaryIO
+from typing import Any, Dict, List, Optional, Union
 
 from requests.exceptions import HTTPError
 
@@ -10,7 +10,9 @@ from .client_base import APIClientBase
 class APIClientS3Objects(APIClientBase):
     """Extension of APIClientBase with S3 objects management methods."""
 
-    def list_objects(self, bucket_name: str, prefix: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_objects(
+        self, bucket_name: str, prefix: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         List objects in an S3 bucket.
 
@@ -28,7 +30,7 @@ class APIClientS3Objects(APIClientBase):
         params = {}
         if prefix:
             params["prefix"] = prefix
-        
+
         try:
             response = self.session.get(url, params=params)
             response.raise_for_status()
@@ -41,11 +43,11 @@ class APIClientS3Objects(APIClientBase):
             raise ValueError(f"Error listing S3 objects: {error_detail}")
 
     def upload_object(
-        self, 
-        bucket_name: str, 
-        object_key: str, 
-        file_data: BinaryIO,
-        content_type: Optional[str] = None
+        self,
+        bucket_name: str,
+        object_key: str,
+        file_data: Union[bytes, Any],
+        content_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Upload an object to an S3 bucket.
@@ -65,7 +67,7 @@ class APIClientS3Objects(APIClientBase):
         url = f"{self.base_url}/s3/objects/{bucket_name}"
         files = {"file": (object_key, file_data, content_type)}
         data = {"object_key": object_key}
-        
+
         try:
             response = self.session.post(url, files=files, data=data)
             response.raise_for_status()
@@ -92,7 +94,7 @@ class APIClientS3Objects(APIClientBase):
             ValueError: If download fails or object doesn't exist.
         """
         url = f"{self.base_url}/s3/objects/{bucket_name}/{object_key}"
-        
+
         try:
             response = self.session.get(url)
             response.raise_for_status()
@@ -103,10 +105,15 @@ class APIClientS3Objects(APIClientBase):
             except Exception:
                 error_detail = str(e)
             if response.status_code == 404:
-                raise ValueError(f"S3 object '{object_key}' not found in bucket '{bucket_name}'")
+                raise ValueError(
+                    f"S3 object '{object_key}' not found in bucket "
+                    f"'{bucket_name}'"
+                )
             raise ValueError(f"Error downloading S3 object: {error_detail}")
 
-    def delete_object(self, bucket_name: str, object_key: str) -> Dict[str, Any]:
+    def delete_object(
+        self, bucket_name: str, object_key: str
+    ) -> Dict[str, Any]:
         """
         Delete an object from an S3 bucket.
 
@@ -121,7 +128,7 @@ class APIClientS3Objects(APIClientBase):
             ValueError: If deletion fails or object doesn't exist.
         """
         url = f"{self.base_url}/s3/objects/{bucket_name}/{object_key}"
-        
+
         try:
             response = self.session.delete(url)
             response.raise_for_status()
@@ -132,10 +139,15 @@ class APIClientS3Objects(APIClientBase):
             except Exception:
                 error_detail = str(e)
             if response.status_code == 404:
-                raise ValueError(f"S3 object '{object_key}' not found in bucket '{bucket_name}'")
+                raise ValueError(
+                    f"S3 object '{object_key}' not found in bucket "
+                    f"'{bucket_name}'"
+                )
             raise ValueError(f"Error deleting S3 object: {error_detail}")
 
-    def get_object_metadata(self, bucket_name: str, object_key: str) -> Dict[str, Any]:
+    def get_object_metadata(
+        self, bucket_name: str, object_key: str
+    ) -> Dict[str, Any]:
         """
         Get metadata for an S3 object.
 
@@ -150,7 +162,7 @@ class APIClientS3Objects(APIClientBase):
             ValueError: If the request fails or object doesn't exist.
         """
         url = f"{self.base_url}/s3/objects/{bucket_name}/{object_key}/metadata"
-        
+
         try:
             response = self.session.get(url)
             response.raise_for_status()
@@ -161,14 +173,19 @@ class APIClientS3Objects(APIClientBase):
             except Exception:
                 error_detail = str(e)
             if response.status_code == 404:
-                raise ValueError(f"S3 object '{object_key}' not found in bucket '{bucket_name}'")
-            raise ValueError(f"Error getting S3 object metadata: {error_detail}")
+                raise ValueError(
+                    f"S3 object '{object_key}' not found in bucket "
+                    f"'{bucket_name}'"
+                )
+            raise ValueError(
+                f"Error getting S3 object metadata: {error_detail}"
+            )
 
     def generate_presigned_upload_url(
-        self, 
-        bucket_name: str, 
+        self,
+        bucket_name: str,
         object_key: str,
-        expiration: Optional[int] = None
+        expiration: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Generate a presigned URL for uploading an object.
@@ -184,11 +201,14 @@ class APIClientS3Objects(APIClientBase):
         Raises:
             ValueError: If URL generation fails.
         """
-        url = f"{self.base_url}/s3/objects/{bucket_name}/{object_key}/presigned-upload"
+        url = (
+            f"{self.base_url}/s3/objects/{bucket_name}/{object_key}/"
+            "presigned-upload"
+        )
         data = {}
         if expiration:
             data["expiration"] = expiration
-        
+
         try:
             response = self.session.post(url, json=data)
             response.raise_for_status()
@@ -198,13 +218,15 @@ class APIClientS3Objects(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-            raise ValueError(f"Error generating presigned upload URL: {error_detail}")
+            raise ValueError(
+                f"Error generating presigned upload URL: {error_detail}"
+            )
 
     def generate_presigned_download_url(
-        self, 
-        bucket_name: str, 
+        self,
+        bucket_name: str,
         object_key: str,
-        expiration: Optional[int] = None
+        expiration: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Generate a presigned URL for downloading an object.
@@ -220,11 +242,14 @@ class APIClientS3Objects(APIClientBase):
         Raises:
             ValueError: If URL generation fails.
         """
-        url = f"{self.base_url}/s3/objects/{bucket_name}/{object_key}/presigned-download"
+        url = (
+            f"{self.base_url}/s3/objects/{bucket_name}/{object_key}/"
+            "presigned-download"
+        )
         data = {}
         if expiration:
             data["expiration"] = expiration
-        
+
         try:
             response = self.session.post(url, json=data)
             response.raise_for_status()
@@ -234,4 +259,6 @@ class APIClientS3Objects(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-            raise ValueError(f"Error generating presigned download URL: {error_detail}")
+            raise ValueError(
+                f"Error generating presigned download URL: {error_detail}"
+            )

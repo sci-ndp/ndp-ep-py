@@ -1,6 +1,6 @@
 """S3 buckets management functionality."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from requests.exceptions import HTTPError
 
@@ -32,7 +32,7 @@ class APIClientS3Buckets(APIClientBase):
                 error_detail = str(e)
             raise ValueError(f"Error listing S3 buckets: {error_detail}")
 
-    def create_bucket(self, bucket_name: str, **kwargs) -> Dict[str, Any]:
+    def create_bucket(self, bucket_name: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Create a new S3 bucket.
 
