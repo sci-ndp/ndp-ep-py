@@ -65,7 +65,7 @@ class APIClientS3Objects(APIClientBase):
             ValueError: If upload fails.
         """
         url = f"{self.base_url}/s3/objects/{bucket_name}"
-        files = {"file": (object_key, file_data, content_type)}
+        files: Dict[str, Any] = {"file": (object_key, file_data, content_type)}
         data = {"object_key": object_key}
 
         try:
