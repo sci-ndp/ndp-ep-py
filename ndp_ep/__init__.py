@@ -25,7 +25,7 @@ from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
 from .update_url_method import APIClientURLUpdate
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __description__ = "Python client library for NDP EP API"
 
 # Main exports

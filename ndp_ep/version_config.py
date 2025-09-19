@@ -7,7 +7,7 @@ Update this version when new features require newer API versions.
 
 # Minimum required API version for full library functionality
 # Format: "major.minor.patch"
-MINIMUM_API_VERSION = "0.1.0"
+MINIMUM_API_VERSION = "0.2.0"
 
 
 # Version comparison helper functions
