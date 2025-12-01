@@ -24,6 +24,7 @@ from .search_method import APIClientSearch
 from .update_dataset_method import APIClientDatasetUpdate
 from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
+from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
 __version__ = "0.1.1"
