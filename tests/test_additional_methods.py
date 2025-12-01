@@ -172,6 +172,48 @@ class TestUpdateMethods:
             result = update_s3_client.update_s3_resource("s3123", update_data)
             assert "updated successfully" in result["message"]
 
+    def test_patch_s3_resource_success(self, update_s3_client):
+        """Test successful S3 resource partial update."""
+        patch_data = {"resource_title": "Partially Updated Title"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/s3123",
+                json={"message": "S3 resource updated successfully"},
+                status_code=200,
+            )
+
+            result = update_s3_client.patch_s3_resource("s3123", patch_data)
+            assert "updated successfully" in result["message"]
+
+    def test_patch_s3_resource_not_found(self, update_s3_client):
+        """Test S3 resource partial update when not found."""
+        patch_data = {"resource_title": "New Title"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/nonexistent",
+                json={"detail": "S3 resource not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(ValueError, match="Not found"):
+                update_s3_client.patch_s3_resource("nonexistent", patch_data)
+
+    def test_patch_s3_resource_reserved_key(self, update_s3_client):
+        """Test S3 resource partial update with reserved key error."""
+        patch_data = {"extras": {"id": "reserved"}}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/s3123",
+                json={"detail": "Reserved key error: id"},
+                status_code=400,
+            )
+
+            with pytest.raises(ValueError, match="Reserved key"):
+                update_s3_client.patch_s3_resource("s3123", patch_data)
+
     def test_update_url_resource_success(self, update_url_client):
         """Test successful URL resource update."""
         update_data = {"resource_title": "Updated URL Title"}
