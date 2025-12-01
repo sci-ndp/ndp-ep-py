@@ -545,7 +545,7 @@ class TestS3BucketsErrorHandling:
             assert result == expected_response
             # Verify the additional parameter was sent
             request_data = m.last_request.json()
-            assert request_data["bucket_name"] == "test-bucket"
+            assert request_data["name"] == "test-bucket"
             assert request_data["region"] == "us-east-1"
 
     def test_get_bucket_info_error(self, s3_buckets_client, mock_api_base):
