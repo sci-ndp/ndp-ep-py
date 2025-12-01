@@ -18,6 +18,7 @@ from .search_method import APIClientSearch
 from .update_dataset_method import APIClientDatasetUpdate
 from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
+from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
 
@@ -32,6 +33,7 @@ class APIClient(
     APIClientSearch,
     APIClientKafkaUpdate,
     APIClientS3Update,
+    APIClientServiceUpdate,
     APIClientURLUpdate,
     APIClientDatasetUpdate,
     APIClientOrganizationDelete,
@@ -51,7 +53,7 @@ class APIClient(
     Features:
     - Organization management (create, list, delete)
     - Resource registration (Kafka, S3, URL, Services, General datasets)
-    - Resource updates (Kafka, S3, URL, General datasets)
+    - Resource updates (Kafka, S3, URL, Services, General datasets)
     - Resource deletion (by ID and name)
     - Search functionality (simple and advanced)
     - System information (status, metrics, Kafka details, Jupyter details)
