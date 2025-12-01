@@ -4,6 +4,7 @@ from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails
 from .get_system_status_method import APIClientSystemStatus
+from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
 from .register_dataset_method import APIClientDatasetRegister
 from .register_kafka_method import APIClientKafkaRegister
@@ -37,6 +38,7 @@ class APIClient(
     APIClientResourceDelete,
     APIClientKafkaDetails,
     APIClientSystemStatus,
+    APIClientUserInfo,
     APIClientS3Buckets,
     APIClientS3Objects,
 ):
@@ -53,6 +55,7 @@ class APIClient(
     - Resource deletion (by ID and name)
     - Search functionality (simple and advanced)
     - System information (status, metrics, Kafka details, Jupyter details)
+    - User information (get current authenticated user details)
     - S3 buckets management (create, list, delete, get info)
     - S3 objects management (upload, download, delete, list, metadata, presigned URLs)
     - Authentication (token-based and username/password)
