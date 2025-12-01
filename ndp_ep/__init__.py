@@ -8,6 +8,7 @@ datasets, organizations, resources, and services through the API.
 
 from .api_client import APIClient
 from .client_base import APIClientBase
+from .dataset_resource_method import APIClientDatasetResource
 from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails

@@ -1,5 +1,6 @@
 """Unified API Client combining all functionality."""
 
+from .dataset_resource_method import APIClientDatasetResource
 from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails
@@ -36,6 +37,7 @@ class APIClient(
     APIClientServiceUpdate,
     APIClientURLUpdate,
     APIClientDatasetUpdate,
+    APIClientDatasetResource,
     APIClientOrganizationDelete,
     APIClientResourceDelete,
     APIClientKafkaDetails,
@@ -54,7 +56,7 @@ class APIClient(
     - Organization management (create, list, delete)
     - Resource registration (Kafka, S3, URL, Services, General datasets)
     - Resource updates (Kafka, S3, URL, Services, General datasets)
-    - Resource deletion (by ID and name)
+    - Resource deletion (by ID, name, or from dataset)
     - Search functionality (simple and advanced)
     - System information (status, metrics, Kafka details, Jupyter details)
     - User information (get current authenticated user details)
