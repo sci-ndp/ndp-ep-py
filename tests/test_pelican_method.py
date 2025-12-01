@@ -90,7 +90,9 @@ class TestPelicanMethods:
         """Test browsing with detail flag."""
         expected_response = {
             "success": True,
-            "files": [{"name": "data.csv", "size": 1024, "modified": "2024-01-01"}],
+            "files": [
+                {"name": "data.csv", "size": 1024, "modified": "2024-01-01"}
+            ],
             "count": 1,
         }
 
@@ -233,7 +235,10 @@ class TestPelicanMethods:
 
     def test_import_pelican_metadata_with_description(self, client):
         """Test metadata import with description."""
-        expected_response = {"success": True, "resource": {"id": "resource-123"}}
+        expected_response = {
+            "success": True,
+            "resource": {"id": "resource-123"},
+        }
 
         with requests_mock.Mocker() as m:
             m.post(
@@ -256,7 +261,10 @@ class TestPelicanMethods:
             assert request_body["pelican_url"] == expected_url
             assert request_body["package_id"] == "my-dataset"
             assert request_body["resource_name"] == "Data File"
-            assert request_body["resource_description"] == "Climate data from 2024"
+            assert (
+                request_body["resource_description"]
+                == "Climate data from 2024"
+            )
 
     def test_import_pelican_metadata_invalid_url(self, client):
         """Test import with invalid URL."""

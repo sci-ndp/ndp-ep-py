@@ -233,7 +233,9 @@ class TestUpdateMethods:
                 status_code=200,
             )
 
-            result = update_service_client.update_service("svc123", update_data)
+            result = update_service_client.update_service(
+                "svc123", update_data
+            )
             assert "updated successfully" in result["message"]
 
     def test_update_service_not_found(self, update_service_client):
@@ -248,7 +250,9 @@ class TestUpdateMethods:
             )
 
             with pytest.raises(ValueError, match="Not found"):
-                update_service_client.update_service("nonexistent", update_data)
+                update_service_client.update_service(
+                    "nonexistent", update_data
+                )
 
     def test_patch_service_success(self, update_service_client):
         """Test successful service partial update."""

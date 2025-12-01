@@ -228,4 +228,6 @@ class APIClientPelican(APIClientBase):
                 error_detail = response.json().get("detail", str(e))
             except Exception:
                 error_detail = str(e)
-            raise ValueError(f"Error importing Pelican metadata: {error_detail}")
+            raise ValueError(
+                f"Error importing Pelican metadata: {error_detail}"
+            )

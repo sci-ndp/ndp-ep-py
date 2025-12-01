@@ -63,7 +63,7 @@ class APIClient(
     - System information (status, metrics, Kafka details, Jupyter details)
     - User information (get current authenticated user details)
     - S3 buckets management (create, list, delete, get info)
-    - S3 objects management (upload, download, delete, list, metadata, presigned URLs)
+    - S3 objects management (upload, download, delete, list, metadata)
     - Pelican federation (browse, download, import metadata)
     - Authentication (token-based and username/password)
 

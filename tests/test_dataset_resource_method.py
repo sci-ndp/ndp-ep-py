@@ -77,11 +77,15 @@ class TestDatasetResourceMethods:
         with requests_mock.Mocker() as m:
             m.delete(
                 "http://example.com/dataset/dataset123/resource/resource123",
-                json={"message": "Resource 'resource123' deleted successfully"},
+                json={
+                    "message": "Resource 'resource123' deleted successfully"
+                },
                 status_code=200,
             )
 
-            result = client.delete_dataset_resource("dataset123", "resource123")
+            result = client.delete_dataset_resource(
+                "dataset123", "resource123"
+            )
             assert "deleted successfully" in result["message"]
 
     def test_delete_dataset_resource_not_found(self, client):
@@ -115,7 +119,10 @@ class TestDatasetResourceMethods:
         with requests_mock.Mocker() as m:
             m.patch(
                 "http://example.com/dataset/dataset123/resource/resource123",
-                json={"id": "resource123", "url": "https://new-url.com/data.csv"},
+                json={
+                    "id": "resource123",
+                    "url": "https://new-url.com/data.csv",
+                },
                 status_code=200,
             )
 
