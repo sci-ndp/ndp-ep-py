@@ -15,6 +15,7 @@ from .get_kafka_details_method import APIClientKafkaDetails
 from .get_system_status_method import APIClientSystemStatus
 from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
+from .pelican_method import APIClientPelican
 from .register_dataset_method import APIClientDatasetRegister
 from .register_kafka_method import APIClientKafkaRegister
 from .register_organization_method import APIClientOrganizationRegister

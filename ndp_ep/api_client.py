@@ -4,6 +4,7 @@ from .dataset_resource_method import APIClientDatasetResource
 from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails
+from .pelican_method import APIClientPelican
 from .get_system_status_method import APIClientSystemStatus
 from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
@@ -45,6 +46,7 @@ class APIClient(
     APIClientUserInfo,
     APIClientS3Buckets,
     APIClientS3Objects,
+    APIClientPelican,
 ):
     """
     Unified API Client with comprehensive functionality.
@@ -62,6 +64,7 @@ class APIClient(
     - User information (get current authenticated user details)
     - S3 buckets management (create, list, delete, get info)
     - S3 objects management (upload, download, delete, list, metadata, presigned URLs)
+    - Pelican federation (browse, download, import metadata)
     - Authentication (token-based and username/password)
 
     Example:
