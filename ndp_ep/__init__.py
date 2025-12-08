@@ -25,6 +25,45 @@ from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
 from .update_url_method import APIClientURLUpdate
 
+# Optional convenience export for the remote execution decorator.
+try:  # pragma: no cover - depends on optional SciDx-rexec install
+    from rexec.client_api import remote_func as remote_func  # type: ignore
+except ImportError as exc:  # pragma: no cover
+    class _RemoteFuncProxy:
+        """
+        Lazy proxy that raises a helpful error if SciDx-rexec is missing.
+        """
+
+        def __init__(self, error: ImportError):
+            self._error = error
+            self._target = None
+
+        def _load(self):
+            if self._target is None:
+                try:
+                    from rexec.client_api import remote_func as _rf  # type: ignore
+                except ImportError as err:
+                    raise ImportError(
+                        "SciDx-rexec is required for remote execution. "
+                        "Install 'ndp-ep[rexec]' to use ndp_ep.remote_func."
+                    ) from err
+                self._target = _rf
+            return self._target
+
+        def __call__(self, *args, **kwargs):
+            return self._load()(*args, **kwargs)
+
+        def __getattr__(self, item):
+            return getattr(self._load(), item)
+
+        def __setattr__(self, name, value):
+            if name in {"_error", "_target"}:
+                object.__setattr__(self, name, value)
+            else:
+                setattr(self._load(), name, value)
+
+    remote_func = _RemoteFuncProxy(exc)
+
 __version__ = "0.1.1"
 __description__ = "Python client library for NDP EP API"
 
@@ -32,6 +71,7 @@ __description__ = "Python client library for NDP EP API"
 __all__ = [
     "APIClient",
     "APIClientBase",
+    "remote_func",
     "__version__",
     "__description__",
 ]

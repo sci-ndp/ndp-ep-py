@@ -11,6 +11,7 @@ from .register_organization_method import APIClientOrganizationRegister
 from .register_s3_method import APIClientS3Register
 from .register_service_method import APIClientServiceRegister
 from .register_url_method import APIClientURLRegister
+from .rexec_method import APIClientRexec
 from .s3_buckets_method import APIClientS3Buckets
 from .s3_objects_method import APIClientS3Objects
 from .search_method import APIClientSearch
@@ -39,6 +40,7 @@ class APIClient(
     APIClientSystemStatus,
     APIClientS3Buckets,
     APIClientS3Objects,
+    APIClientRexec,
 ):
     """
     Unified API Client with comprehensive functionality.
@@ -56,6 +58,7 @@ class APIClient(
     - S3 buckets management (create, list, delete, get info)
     - S3 objects management (upload, download, delete, list, metadata, presigned URLs)
     - Authentication (token-based and username/password)
+    - Remote execution environment provisioning
 
     Example:
         >>> client = APIClient(
