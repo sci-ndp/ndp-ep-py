@@ -29,7 +29,7 @@ from .update_s3_method import APIClientS3Update
 from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __description__ = "Python client library for NDP EP API"
 
 # Main exports
