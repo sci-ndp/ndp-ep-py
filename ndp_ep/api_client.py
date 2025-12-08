@@ -14,6 +14,7 @@ from .register_organization_method import APIClientOrganizationRegister
 from .register_s3_method import APIClientS3Register
 from .register_service_method import APIClientServiceRegister
 from .register_url_method import APIClientURLRegister
+from .resource_method import APIClientResource
 from .s3_buckets_method import APIClientS3Buckets
 from .s3_objects_method import APIClientS3Objects
 from .search_method import APIClientSearch
@@ -41,6 +42,7 @@ class APIClient(
     APIClientDatasetResource,
     APIClientOrganizationDelete,
     APIClientResourceDelete,
+    APIClientResource,
     APIClientKafkaDetails,
     APIClientSystemStatus,
     APIClientUserInfo,
@@ -59,6 +61,7 @@ class APIClient(
     - Resource registration (Kafka, S3, URL, Services, General datasets)
     - Resource updates (Kafka, S3, URL, Services, General datasets)
     - Resource deletion (by ID, name, or from dataset)
+    - Resource operations by ID (get, patch, delete, search)
     - Search functionality (simple and advanced)
     - System information (status, metrics, Kafka details, Jupyter details)
     - User information (get current authenticated user details)
