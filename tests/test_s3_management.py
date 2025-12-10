@@ -1,8 +1,6 @@
 """Tests for S3 buckets and objects management functionality."""
 
 import io
-import warnings
-from unittest.mock import patch
 
 import pytest
 import requests_mock
@@ -225,10 +223,10 @@ class TestS3ObjectsManagement:
                 status_code=404,
             )
 
-            with pytest.raises(
-                ValueError,
-                match="S3 object 'nonexistent.txt' not found in bucket 'test-bucket'",
-            ):
+            err = (
+                "S3 object 'nonexistent.txt' not found in bucket 'test-bucket'"
+            )
+            with pytest.raises(ValueError, match=err):
                 s3_objects_client.download_object(
                     "test-bucket", "nonexistent.txt"
                 )
@@ -279,11 +277,9 @@ class TestS3ObjectsManagement:
                 "url": "https://s3.amazonaws.com/test-bucket",
                 "fields": {"key": "test-file.txt", "policy": "base64policy"},
             }
-            m.post(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-upload",
-                json=expected_response,
-                status_code=200,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/presigned-upload"
+            m.post(url, json=expected_response, status_code=200)
 
             result = s3_objects_client.generate_presigned_upload_url(
                 "test-bucket", "test-file.txt"
@@ -295,14 +291,13 @@ class TestS3ObjectsManagement:
     ):
         """Test successful presigned download URL generation."""
         with requests_mock.Mocker() as m:
+            s3_url = "https://s3.amazonaws.com/test-bucket"
             expected_response = {
-                "url": "https://s3.amazonaws.com/test-bucket/test-file.txt?signature=abc"
+                "url": f"{s3_url}/test-file.txt?signature=abc"
             }
-            m.post(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-download",
-                json=expected_response,
-                status_code=200,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/presigned-download"
+            m.post(url, json=expected_response, status_code=200)
 
             result = s3_objects_client.generate_presigned_download_url(
                 "test-bucket", "test-file.txt"
@@ -314,14 +309,11 @@ class TestS3ObjectsManagement:
     ):
         """Test presigned URL generation with custom expiration."""
         with requests_mock.Mocker() as m:
-            expected_response = {
-                "url": "https://s3.amazonaws.com/test-bucket/test-file.txt"
-            }
-            m.post(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-upload",
-                json=expected_response,
-                status_code=200,
-            )
+            s3_url = "https://s3.amazonaws.com/test-bucket/test-file.txt"
+            expected_response = {"url": s3_url}
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/presigned-upload"
+            m.post(url, json=expected_response, status_code=200)
 
             result = s3_objects_client.generate_presigned_upload_url(
                 "test-bucket", "test-file.txt", expiration=3600
@@ -421,10 +413,10 @@ class TestS3ObjectsManagement:
                 status_code=404,
             )
 
-            with pytest.raises(
-                ValueError,
-                match="S3 object 'nonexistent.txt' not found in bucket 'test-bucket'",
-            ):
+            err = (
+                "S3 object 'nonexistent.txt' not found in bucket 'test-bucket'"
+            )
+            with pytest.raises(ValueError, match=err):
                 s3_objects_client.delete_object(
                     "test-bucket", "nonexistent.txt"
                 )
@@ -434,16 +426,14 @@ class TestS3ObjectsManagement:
     ):
         """Test object metadata when object doesn't exist."""
         with requests_mock.Mocker() as m:
-            m.get(
-                f"{mock_api_base}/s3/objects/test-bucket/nonexistent.txt/metadata",
-                json={"detail": "Object not found"},
-                status_code=404,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/nonexistent.txt/metadata"
+            m.get(url, json={"detail": "Object not found"}, status_code=404)
 
-            with pytest.raises(
-                ValueError,
-                match="S3 object 'nonexistent.txt' not found in bucket 'test-bucket'",
-            ):
+            err = (
+                "S3 object 'nonexistent.txt' not found in bucket 'test-bucket'"
+            )
+            with pytest.raises(ValueError, match=err):
                 s3_objects_client.get_object_metadata(
                     "test-bucket", "nonexistent.txt"
                 )
@@ -451,11 +441,9 @@ class TestS3ObjectsManagement:
     def test_get_object_metadata_error(self, s3_objects_client, mock_api_base):
         """Test object metadata error handling."""
         with requests_mock.Mocker() as m:
-            m.get(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/metadata",
-                json={"detail": "Access denied"},
-                status_code=403,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/metadata"
+            m.get(url, json={"detail": "Access denied"}, status_code=403)
 
             with pytest.raises(
                 ValueError, match="Error getting S3 object metadata"
@@ -469,11 +457,9 @@ class TestS3ObjectsManagement:
     ):
         """Test presigned upload URL generation error."""
         with requests_mock.Mocker() as m:
-            m.post(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-upload",
-                json={"detail": "Access denied"},
-                status_code=403,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/presigned-upload"
+            m.post(url, json={"detail": "Access denied"}, status_code=403)
 
             with pytest.raises(
                 ValueError, match="Error generating presigned upload URL"
@@ -487,11 +473,9 @@ class TestS3ObjectsManagement:
     ):
         """Test presigned download URL generation error."""
         with requests_mock.Mocker() as m:
-            m.post(
-                f"{mock_api_base}/s3/objects/test-bucket/test-file.txt/presigned-download",
-                json={"detail": "Access denied"},
-                status_code=403,
-            )
+            url = f"{mock_api_base}/s3/objects/test-bucket"
+            url += "/test-file.txt/presigned-download"
+            m.post(url, json={"detail": "Access denied"}, status_code=403)
 
             with pytest.raises(
                 ValueError, match="Error generating presigned download URL"
@@ -561,7 +545,7 @@ class TestS3BucketsErrorHandling:
             assert result == expected_response
             # Verify the additional parameter was sent
             request_data = m.last_request.json()
-            assert request_data["bucket_name"] == "test-bucket"
+            assert request_data["name"] == "test-bucket"
             assert request_data["region"] == "us-east-1"
 
     def test_get_bucket_info_error(self, s3_buckets_client, mock_api_base):

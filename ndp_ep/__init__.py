@@ -8,11 +8,14 @@ datasets, organizations, resources, and services through the API.
 
 from .api_client import APIClient
 from .client_base import APIClientBase
+from .dataset_resource_method import APIClientDatasetResource
 from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails
 from .get_system_status_method import APIClientSystemStatus
+from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
+from .pelican_method import APIClientPelican
 from .register_dataset_method import APIClientDatasetRegister
 from .register_kafka_method import APIClientKafkaRegister
 from .register_organization_method import APIClientOrganizationRegister
@@ -23,6 +26,7 @@ from .search_method import APIClientSearch
 from .update_dataset_method import APIClientDatasetUpdate
 from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
+from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
 # Optional convenience export for the remote execution decorator.
@@ -64,7 +68,7 @@ except ImportError as exc:  # pragma: no cover
 
     remote_func = _RemoteFuncProxy(exc)
 
-__version__ = "0.1.1"
+__version__ = "0.4.0"
 __description__ = "Python client library for NDP EP API"
 
 # Main exports

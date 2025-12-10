@@ -11,6 +11,7 @@ from ndp_ep.list_organization_method import APIClientOrganizationList
 from ndp_ep.update_dataset_method import APIClientDatasetUpdate
 from ndp_ep.update_kafka_method import APIClientKafkaUpdate
 from ndp_ep.update_s3_method import APIClientS3Update
+from ndp_ep.update_service_method import APIClientServiceUpdate
 from ndp_ep.update_url_method import APIClientURLUpdate
 
 
@@ -136,6 +137,13 @@ class TestUpdateMethods:
             return APIClientURLUpdate(base_url="http://example.com")
 
     @pytest.fixture
+    def update_service_client(self):
+        """Create update service client."""
+        with requests_mock.Mocker() as m:
+            m.get("http://example.com", status_code=200)
+            return APIClientServiceUpdate(base_url="http://example.com")
+
+    @pytest.fixture
     def update_dataset_client(self):
         """Create update dataset client."""
         with requests_mock.Mocker() as m:
@@ -171,6 +179,122 @@ class TestUpdateMethods:
 
             result = update_s3_client.update_s3_resource("s3123", update_data)
             assert "updated successfully" in result["message"]
+
+    def test_patch_s3_resource_success(self, update_s3_client):
+        """Test successful S3 resource partial update."""
+        patch_data = {"resource_title": "Partially Updated Title"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/s3123",
+                json={"message": "S3 resource updated successfully"},
+                status_code=200,
+            )
+
+            result = update_s3_client.patch_s3_resource("s3123", patch_data)
+            assert "updated successfully" in result["message"]
+
+    def test_patch_s3_resource_not_found(self, update_s3_client):
+        """Test S3 resource partial update when not found."""
+        patch_data = {"resource_title": "New Title"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/nonexistent",
+                json={"detail": "S3 resource not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(ValueError, match="Not found"):
+                update_s3_client.patch_s3_resource("nonexistent", patch_data)
+
+    def test_patch_s3_resource_reserved_key(self, update_s3_client):
+        """Test S3 resource partial update with reserved key error."""
+        patch_data = {"extras": {"id": "reserved"}}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/s3/s3123",
+                json={"detail": "Reserved key error: id"},
+                status_code=400,
+            )
+
+            with pytest.raises(ValueError, match="Reserved key"):
+                update_s3_client.patch_s3_resource("s3123", patch_data)
+
+    def test_update_service_success(self, update_service_client):
+        """Test successful service update."""
+        update_data = {"service_title": "Updated Service"}
+
+        with requests_mock.Mocker() as m:
+            m.put(
+                "http://example.com/services/svc123",
+                json={"message": "Service updated successfully"},
+                status_code=200,
+            )
+
+            result = update_service_client.update_service(
+                "svc123", update_data
+            )
+            assert "updated successfully" in result["message"]
+
+    def test_update_service_not_found(self, update_service_client):
+        """Test service update when not found."""
+        update_data = {"service_title": "New Title"}
+
+        with requests_mock.Mocker() as m:
+            m.put(
+                "http://example.com/services/nonexistent",
+                json={"detail": "Service not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(ValueError, match="Not found"):
+                update_service_client.update_service(
+                    "nonexistent", update_data
+                )
+
+    def test_patch_service_success(self, update_service_client):
+        """Test successful service partial update."""
+        patch_data = {"service_url": "https://new-url.example.com/api"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/services/svc123",
+                json={"message": "Service updated successfully"},
+                status_code=200,
+            )
+
+            result = update_service_client.patch_service("svc123", patch_data)
+            assert "updated successfully" in result["message"]
+
+    def test_patch_service_not_found(self, update_service_client):
+        """Test service partial update when not found."""
+        patch_data = {"service_title": "New Title"}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/services/nonexistent",
+                json={"detail": "Service not found"},
+                status_code=404,
+            )
+
+            with pytest.raises(ValueError, match="Not found"):
+                update_service_client.patch_service("nonexistent", patch_data)
+
+    def test_patch_service_reserved_key(self, update_service_client):
+        """Test service partial update with reserved key error."""
+        patch_data = {"extras": {"id": "reserved"}}
+
+        with requests_mock.Mocker() as m:
+            m.patch(
+                "http://example.com/services/svc123",
+                json={"detail": "Reserved key error: id"},
+                status_code=400,
+            )
+
+            with pytest.raises(ValueError, match="Reserved key"):
+                update_service_client.patch_service("svc123", patch_data)
 
     def test_update_url_resource_success(self, update_url_client):
         """Test successful URL resource update."""

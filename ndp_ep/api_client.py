@@ -1,9 +1,12 @@
 """Unified API Client combining all functionality."""
 
+from .dataset_resource_method import APIClientDatasetResource
 from .delete_organization_method import APIClientOrganizationDelete
 from .delete_resource_method import APIClientResourceDelete
 from .get_kafka_details_method import APIClientKafkaDetails
+from .pelican_method import APIClientPelican
 from .get_system_status_method import APIClientSystemStatus
+from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
 from .register_dataset_method import APIClientDatasetRegister
 from .register_kafka_method import APIClientKafkaRegister
@@ -12,12 +15,14 @@ from .register_s3_method import APIClientS3Register
 from .register_service_method import APIClientServiceRegister
 from .register_url_method import APIClientURLRegister
 from .rexec_method import APIClientRexec
+from .resource_method import APIClientResource
 from .s3_buckets_method import APIClientS3Buckets
 from .s3_objects_method import APIClientS3Objects
 from .search_method import APIClientSearch
 from .update_dataset_method import APIClientDatasetUpdate
 from .update_kafka_method import APIClientKafkaUpdate
 from .update_s3_method import APIClientS3Update
+from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
 
@@ -32,15 +37,20 @@ class APIClient(
     APIClientSearch,
     APIClientKafkaUpdate,
     APIClientS3Update,
+    APIClientServiceUpdate,
     APIClientURLUpdate,
     APIClientDatasetUpdate,
+    APIClientDatasetResource,
     APIClientOrganizationDelete,
     APIClientResourceDelete,
+    APIClientResource,
     APIClientKafkaDetails,
     APIClientSystemStatus,
+    APIClientUserInfo,
     APIClientS3Buckets,
     APIClientS3Objects,
     APIClientRexec,
+    APIClientPelican,
 ):
     """
     Unified API Client with comprehensive functionality.
@@ -51,12 +61,15 @@ class APIClient(
     Features:
     - Organization management (create, list, delete)
     - Resource registration (Kafka, S3, URL, Services, General datasets)
-    - Resource updates (Kafka, S3, URL, General datasets)
-    - Resource deletion (by ID and name)
+    - Resource updates (Kafka, S3, URL, Services, General datasets)
+    - Resource deletion (by ID, name, or from dataset)
+    - Resource operations by ID (get, patch, delete, search)
     - Search functionality (simple and advanced)
     - System information (status, metrics, Kafka details, Jupyter details)
+    - User information (get current authenticated user details)
     - S3 buckets management (create, list, delete, get info)
-    - S3 objects management (upload, download, delete, list, metadata, presigned URLs)
+    - S3 objects management (upload, download, delete, list, metadata)
+    - Pelican federation (browse, download, import metadata)
     - Authentication (token-based and username/password)
     - Remote execution environment provisioning
 

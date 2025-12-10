@@ -47,7 +47,7 @@ class APIClientS3Buckets(APIClientBase):
             ValueError: If bucket creation fails.
         """
         url = f"{self.base_url}/s3/buckets/"
-        data = {"bucket_name": bucket_name, **kwargs}
+        data = {"name": bucket_name, **kwargs}
         try:
             response = self.session.post(url, json=data)
             response.raise_for_status()

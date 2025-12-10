@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-08
+
+### Added
+- Resource operations by ID without requiring dataset_id:
+  - `get_resource(resource_id)` - GET /resource/{id}
+  - `patch_resource(resource_id, ...)` - PATCH /resource/{id}
+  - `delete_resource(resource_id)` - DELETE /resource/{id}
+  - `search_resources(q, name, url, format, ...)` - GET /resources/search
+- Resource Management tutorial (`docs/source/tutorials/resource_management.ipynb`)
+
+### Features
+- Search resources by query, name, url, format, or description
+- Pagination support with limit/offset for resource search
+- Results include parent dataset context (dataset_id, dataset_name, dataset_title)
+
+## [0.3.0] - 2025-12-01
+
+### Added
+- Pelican Federation methods for browsing and downloading from external federations:
+  - `list_federations()` - GET /pelican/federations
+  - `browse_pelican(path, federation, detail)` - GET /pelican/browse
+  - `get_pelican_info(path, federation)` - GET /pelican/info
+  - `download_pelican(path, federation, stream)` - GET /pelican/download
+  - `import_pelican_metadata(pelican_url, package_id, ...)` - POST /pelican/import-metadata
+- Pelican Federation tutorial (`docs/source/tutorials/pelican_federation.ipynb`)
+
+### Fixed
+- `create_bucket()` now uses correct API field name (`name` instead of `bucket_name`)
+
 ## [0.1.0] - 2025-07-03
 
 ### Added
