@@ -116,14 +116,13 @@ class APIClientBase:
         and compares it with the minimum required version. Shows warning
         if version is incompatible but allows client to continue.
 
-        Note: This method makes an unauthenticated request to /status/
-        since that endpoint should be publicly accessible.
+        Note: This method uses the authenticated session since some
+        API deployments may require authentication for /status/ endpoint.
         """
         try:
-            # Create a temporary session without authentication headers
-            # for status check
-            temp_session = requests.Session()
-            response = temp_session.get(f"{self.base_url}/status/")
+            # Use the authenticated session for status check
+            # (API may require authentication for /status/ endpoint)
+            response = self.session.get(f"{self.base_url}/status/")
             response.raise_for_status()
             status_data = response.json()
 
