@@ -68,7 +68,7 @@ except ImportError as exc:  # pragma: no cover
 
     remote_func = _RemoteFuncProxy(exc)
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __description__ = "Python client library for NDP EP API"
 
 # Main exports
