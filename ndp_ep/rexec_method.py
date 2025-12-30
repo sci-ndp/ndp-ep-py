@@ -17,10 +17,10 @@ except ImportError:  # pragma: no cover - optional dependency at runtime
     _REMOTE_FUNC = None
 
 _DEFAULT_JWKS_URL = (
-    "https://idp.nationaldataplatform.org/realms/NDP/"
+    "https://idp-test.nationaldataplatform.org/realms/NDP/"
     "protocol/openid-connect/certs"
 )
-_DEFAULT_ISSUER = "https://idp.nationaldataplatform.org/realms/NDP"
+_DEFAULT_ISSUER = "https://idp-test.nationaldataplatform.org/realms/NDP"
 _DEFAULT_AUDIENCE = "account"
 
 
@@ -32,7 +32,6 @@ class APIClientRexec(APIClientBase):
         requirements: Union[str, Path, Sequence[str]],
         token: str | None = None,
         *,
-        api_url: str | None = None,
         api_path: str = "/rexec",
         jwks_url: str = _DEFAULT_JWKS_URL,
         issuer: str = _DEFAULT_ISSUER,
@@ -47,10 +46,9 @@ class APIClientRexec(APIClientBase):
             token: Optional Keycloak access token containing the user's identity.
                 When omitted, the client token established during initialization
                 is used.
-            api_url: Optional full URL to the rexec endpoint. If omitted,
-                the client's base_url combined with `api_path` is used.
-            api_path: Relative path to the rexec endpoint when `api_url`
-                is not provided.
+            api_path: Relative path to the rexec endpoint. The deployment API
+                URL is always resolved from querying the base API `/status/rexec`
+                endpoint.
             jwks_url: URL used to download signing keys for token decoding.
             issuer: Expected issuer for the token.
             audience: Expected audience for the token.
@@ -78,8 +76,8 @@ class APIClientRexec(APIClientBase):
             audience=audience,
         )
 
-        rexec_url = self._build_rexec_url(api_url=api_url, api_path=api_path)
-        remote_func.set_api_url(rexec_url)
+        rexec_url = self._resolve_rexec_url(api_path=api_path)
+        remote_func.set_api_url(f'{rexec_url}/spawn')
 
         requirements_path, cleanup = self._prepare_requirements(requirements)
         try:
@@ -161,21 +159,53 @@ class APIClientRexec(APIClientBase):
             raise ValueError("Token missing required 'sub' claim.")
         return str(user_id)
 
-    def _build_rexec_url(self, *, api_url: str | None, api_path: str) -> str:
+    def _resolve_rexec_url(self, *, api_path: str) -> str:
         """
-        Resolve the final rexec endpoint URL.
+        Resolve the final Remote Execution deployment api endpoint URL.
         """
-        if api_url:
-            return api_url.rstrip("/")
-        base = self.base_url.rstrip("/")
+        deployment_api_url = self._fetch_rexec_deployment_api_url()
         path = api_path if api_path.startswith("/") else f"/{api_path}"
-        return f"{base}{path}"
+        deployment_api_url = deployment_api_url.rstrip("/")
+
+        # Avoid double-appending the path if already included in the deployment URL.
+        if deployment_api_url.endswith(path):
+            return deployment_api_url
+
+        return f"{deployment_api_url}{path}"
+
+    def _fetch_rexec_deployment_api_url(self) -> str:
+        """
+        Retrieve the Rexec deployment API base URL from the base NDP Endpoint API.
+        """
+        status_url = f"{self.base_url}/status/rexec"
+        response = self.session.get(status_url)
+        try:
+            response.raise_for_status()
+        except HTTPError as exc:
+            raise ValueError(
+                f"Failed to retrieve Rexec deployment endpoint: {response.text or exc}"
+            ) from exc
+
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise ValueError(
+                "Rexec status endpoint returned invalid JSON."
+            ) from exc
+
+        deployment_api_url = payload.get("deployment_api_url")
+        if not deployment_api_url:
+            raise ValueError(
+                "Rexec status endpoint did not provide 'deployment_api_url'."
+            )
+
+        return str(deployment_api_url).rstrip("/")
 
     def _fetch_rexec_config(self, rexec_url: str) -> dict:
         """
         Retrieve broker and API configuration for the remote execution server.
         """
-        config_url = f"{rexec_url.rstrip('/')}/config"
+        config_url = f"{rexec_url.rstrip('/')}/broker-config"
         response = self.session.get(config_url)
         try:
             response.raise_for_status()
