@@ -6,7 +6,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Callable, Optional, Sequence, Tuple, Union
 
-import jwt
 from requests.exceptions import HTTPError
 
 from .client_base import APIClientBase
@@ -15,13 +14,6 @@ try:
     from rexec.client_api import remote_func as _REMOTE_FUNC
 except ImportError:  # pragma: no cover - optional dependency at runtime
     _REMOTE_FUNC = None
-
-_DEFAULT_JWKS_URL = (
-    "https://idp-test.nationaldataplatform.org/realms/NDP/"
-    "protocol/openid-connect/certs"
-)
-_DEFAULT_ISSUER = "https://idp-test.nationaldataplatform.org/realms/NDP"
-_DEFAULT_AUDIENCE = "account"
 
 
 class APIClientRexec(APIClientBase):
@@ -33,9 +25,6 @@ class APIClientRexec(APIClientBase):
         token: str | None = None,
         *,
         api_path: str = "/rexec",
-        jwks_url: str = _DEFAULT_JWKS_URL,
-        issuer: str = _DEFAULT_ISSUER,
-        audience: str = _DEFAULT_AUDIENCE,
     ) -> dict:
         """
         Provision and configure a remote execution environment.
@@ -49,9 +38,6 @@ class APIClientRexec(APIClientBase):
             api_path: Relative path to the rexec endpoint. The deployment API
                 URL is always resolved from querying the base API `/status/rexec`
                 endpoint.
-            jwks_url: URL used to download signing keys for token decoding.
-            issuer: Expected issuer for the token.
-            audience: Expected audience for the token.
 
         Returns:
             Dictionary containing the remote execution configuration details.
@@ -69,13 +55,7 @@ class APIClientRexec(APIClientBase):
                 "client with an authentication token."
             )
 
-        user_id = self._decode_user_id(
-            resolved_token,
-            jwks_url=jwks_url,
-            issuer=issuer,
-            audience=audience,
-        )
-
+        # rexec_url = "http://localhost:8000/rexec"
         rexec_url = self._resolve_rexec_url(api_path=api_path)
         remote_func.set_api_url(f'{rexec_url}/spawn')
 
@@ -83,7 +63,7 @@ class APIClientRexec(APIClientBase):
         try:
             remote_func.set_environment(
                 str(requirements_path),
-                user_id,
+                resolved_token,
             )
         finally:
             cleanup()
@@ -129,35 +109,6 @@ class APIClientRexec(APIClientBase):
                 pass
 
         return tmp_path, cleanup
-
-    def _decode_user_id(
-        self,
-        token: str,
-        *,
-        jwks_url: str,
-        issuer: str,
-        audience: str,
-    ) -> str:
-        """
-        Decode the Keycloak token and extract the user id.
-        """
-        try:
-            jwks_client = jwt.PyJWKClient(jwks_url)
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
-            decoded = jwt.decode(
-                token,
-                signing_key.key,
-                algorithms=["RS256"],
-                audience=audience,
-                issuer=issuer,
-            )
-        except Exception as exc:  # pragma: no cover - depends on jwt internals
-            raise ValueError("Invalid token provided.") from exc
-
-        user_id = decoded.get("sub")
-        if not user_id:
-            raise ValueError("Token missing required 'sub' claim.")
-        return str(user_id)
 
     def _resolve_rexec_url(self, *, api_path: str) -> str:
         """

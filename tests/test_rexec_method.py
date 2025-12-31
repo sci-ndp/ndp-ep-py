@@ -28,7 +28,11 @@ class StubRemoteFunc:
         path = Path(filename)
         content = path.read_text()
         cls.environments.append(
-            {"path": filename, "token": usr_token, "content": content}
+            {
+                "path": filename,
+                "token": usr_token,
+                "content": content,
+            }
         )
 
     @classmethod
@@ -74,21 +78,6 @@ class FakeSession:
         return self.responses
 
 
-class FakeSigningKey:
-    def __init__(self, key: str):
-        self.key = key
-
-
-class FakeJWKClient:
-    def __init__(self, url: str):
-        self.url = url
-        self.tokens = []
-
-    def get_signing_key_from_jwt(self, token: str):
-        self.tokens.append(token)
-        return FakeSigningKey("secret")
-
-
 def build_client(
     config_payload=None,
     token="CLIENT_TOKEN",
@@ -121,24 +110,11 @@ def build_client(
     return client
 
 
-def stub_jwt(monkeypatch, module, decoded=None):
-    jwk_client = FakeJWKClient("https://jwks.example.com")
-    decoded = decoded or {"sub": "user-123"}
-    monkeypatch.setattr(module.jwt, "PyJWKClient", lambda url: jwk_client)
-    monkeypatch.setattr(
-        module.jwt,
-        "decode",
-        lambda token, key, algorithms, audience, issuer: decoded,
-    )
-    return jwk_client
-
-
 def test_setup_rexec_environment_configures_remote_func(monkeypatch, tmp_path):
     import ndp_ep.rexec_method as rexec_module
 
     StubRemoteFunc.reset()
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
-    stub_jwt(monkeypatch, rexec_module)
 
     config_payload = {
         "broker_external_host": "broker.example.com",
@@ -175,7 +151,6 @@ def test_setup_rexec_environment_uses_deployment_status(monkeypatch, tmp_path):
 
     StubRemoteFunc.reset()
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
-    stub_jwt(monkeypatch, rexec_module)
 
     deployment_api_url = "https://deployment.example.com/rexec"
     client = build_client(
@@ -203,7 +178,6 @@ def test_setup_rexec_environment_with_sequence(monkeypatch):
 
     StubRemoteFunc.reset()
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
-    stub_jwt(monkeypatch, rexec_module)
 
     config_payload = {
         "broker_external_host": "broker",
@@ -237,32 +211,11 @@ def test_setup_rexec_environment_requires_remote_func(monkeypatch):
         client.setup_rexec_environment(requirements=["numpy==1.26.0"])
 
 
-def test_setup_rexec_environment_invalid_token(monkeypatch):
-    import ndp_ep.rexec_method as rexec_module
-
-    StubRemoteFunc.reset()
-    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
-
-    def raise_error(*_args, **_kwargs):
-        raise RuntimeError("decode failure")
-
-    monkeypatch.setattr(
-        rexec_module.jwt, "PyJWKClient", lambda url: FakeJWKClient(url)
-    )
-    monkeypatch.setattr(rexec_module.jwt, "decode", raise_error)
-
-    client = build_client()
-
-    with pytest.raises(ValueError, match="Invalid token"):
-        client.setup_rexec_environment(requirements=["numpy==1.26.0"], token="TOKEN")
-
-
 def test_setup_rexec_environment_raises_on_config_failure(monkeypatch):
     import ndp_ep.rexec_method as rexec_module
 
     StubRemoteFunc.reset()
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
-    stub_jwt(monkeypatch, rexec_module)
 
     status_response = FakeResponse(
         {"deployment_api_url": "https://api.example.com"}
