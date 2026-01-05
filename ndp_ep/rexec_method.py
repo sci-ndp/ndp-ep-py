@@ -57,7 +57,7 @@ class APIClientRexec(APIClientBase):
 
         # rexec_url = "http://localhost:8000/rexec"
         rexec_url = self._resolve_rexec_url(api_path=api_path)
-        remote_func.set_api_url(f'{rexec_url}/spawn')
+        remote_func.set_api_url(f"{rexec_url}/spawn")
 
         requirements_path, cleanup = self._prepare_requirements(requirements)
         try:
@@ -68,12 +68,16 @@ class APIClientRexec(APIClientBase):
         finally:
             cleanup()
 
-        config = self._fetch_rexec_config(rexec_url)
-        self._configure_remote_func(remote_func, config, default_api_url=rexec_url)
+        config = self._fetch_rexec_broker_config(rexec_url)
+        self._configure_remote_func(
+            remote_func, config, default_api_url=rexec_url
+        )
         return config
 
     def _require_remote_func(self):
-        if _REMOTE_FUNC is None:  # pragma: no cover - depends on optional install
+        if (
+            _REMOTE_FUNC is None
+        ):  # pragma: no cover - depends on optional install
             raise ValueError(
                 "SciDx-rexec is not installed. Install it to enable remote execution."
             )
@@ -85,12 +89,16 @@ class APIClientRexec(APIClientBase):
         """
         Normalise requirements input into a file path consumed by remote_func.
         """
+        # if 'requirements' is already a string path, use it directly
+        # example: requirements="path/to/requirements.txt"
         if isinstance(requirements, (str, Path)):
             req_path = Path(requirements)
             if not req_path.exists():
                 raise ValueError(f"Requirements file not found: {req_path}")
             return req_path, lambda: None
 
+        # otherwise, if 'requirements' is a sequence of strings, write to a temp file
+        # example: reqs = ["pandas==2.2.3", "numpy>=1.26", "pyarrow>=16.0,<17.0"]
         tmp = NamedTemporaryFile("w", suffix=".txt", delete=False)
         tmp_path = Path(tmp.name)
         try:
@@ -102,6 +110,7 @@ class APIClientRexec(APIClientBase):
         finally:
             tmp.close()
 
+        # cleanup function to delete the temp file
         def cleanup() -> None:
             try:
                 tmp_path.unlink()
@@ -152,7 +161,7 @@ class APIClientRexec(APIClientBase):
 
         return str(deployment_api_url).rstrip("/")
 
-    def _fetch_rexec_config(self, rexec_url: str) -> dict:
+    def _fetch_rexec_broker_config(self, rexec_url: str) -> dict:
         """
         Retrieve broker and API configuration for the remote execution server.
         """
@@ -162,14 +171,14 @@ class APIClientRexec(APIClientBase):
             response.raise_for_status()
         except HTTPError as exc:
             raise ValueError(
-                f"Failed to retrieve Rexec configuration: {response.text or exc}"
+                f"Failed to retrieve Rexec broker configuration: {response.text or exc}"
             ) from exc
 
         try:
             return response.json()
         except ValueError as exc:
             raise ValueError(
-                "Rexec configuration endpoint returned invalid JSON."
+                "Rexec broker configuration endpoint returned invalid JSON."
             ) from exc
 
     @staticmethod
@@ -182,21 +191,26 @@ class APIClientRexec(APIClientBase):
         """
         Configure the shared remote_func helper with broker and API info.
         """
-        broker_addr: Optional[str] = config.get("broker_external_host") or config.get(
-            "broker_addr"
-        )
-        broker_port: Optional[Union[str, int]] = config.get("broker_external_port") or config.get(
-            "broker_port"
-        )
-
+        # Extract broker address and port from configuration
+        broker_addr: Optional[str] = config.get(
+            "broker_external_host"
+        ) or config.get("broker_addr")
+        broker_port: Optional[Union[str, int]] = config.get(
+            "broker_external_port"
+        ) or config.get("broker_port")
         # Fallback: parse "host:port" formatted external_url if explicit parts missing.
-        if (not broker_addr or not broker_port) and config.get("broker_external_url"):
+        if (not broker_addr or not broker_port) and config.get(
+            "broker_external_url"
+        ):
             parts = str(config["broker_external_url"]).split(":")
             if len(parts) >= 2:
                 broker_addr = broker_addr or ":".join(parts[:-1])
                 broker_port = broker_port or parts[-1]
+
+        # Extract rexec API URL from configuration
         rexec_api_url: Optional[str] = config.get("api_url") or default_api_url
 
+        # Configure the remote_func with broker and API details
         if broker_addr:
             remote_func.set_remote_addr(broker_addr)
         if broker_port:

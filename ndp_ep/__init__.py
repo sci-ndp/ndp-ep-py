@@ -29,13 +29,15 @@ from .update_s3_method import APIClientS3Update
 from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
-# Optional convenience export for the remote execution decorator.
-try:  # pragma: no cover - depends on optional SciDx-rexec install
+# Optional export for the remote execution decorator.
+try:
     from rexec.client_api import remote_func as remote_func  # type: ignore
-except ImportError as exc:  # pragma: no cover
+except ImportError as exc:
+
     class _RemoteFuncProxy:
         """
-        Lazy proxy that raises a helpful error if SciDx-rexec is missing.
+        When end users do 'from ndp_ep import remote_func' and tries to use remote_func,
+        if scidx-rexec is NOT installed, provide a lazy proxy that raises a error
         """
 
         def __init__(self, error: ImportError):
@@ -48,8 +50,8 @@ except ImportError as exc:  # pragma: no cover
                     from rexec.client_api import remote_func as _rf  # type: ignore
                 except ImportError as err:
                     raise ImportError(
-                        "SciDx-rexec is required for remote execution. "
-                        "Install 'ndp-ep[rexec]' to use ndp_ep.remote_func."
+                        "scidx-rexec is required for remote execution. "
+                        "Install 'pip install ndp-ep[rexec]' to use ndp_ep.remote_func."
                     ) from err
                 self._target = _rf
             return self._target

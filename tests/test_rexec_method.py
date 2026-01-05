@@ -100,7 +100,9 @@ def build_client(
         config_url = f"{resolved_rexec_url.rstrip('/')}/config"
         client.session = FakeSession(
             {
-                status_url: FakeResponse({"deployment_api_url": deployment_api_url}),
+                status_url: FakeResponse(
+                    {"deployment_api_url": deployment_api_url}
+                ),
                 config_url: FakeResponse(config_payload),
             }
         )
@@ -230,5 +232,7 @@ def test_setup_rexec_environment_raises_on_config_failure(monkeypatch):
         )
     )
 
-    with pytest.raises(ValueError, match="Failed to retrieve Rexec configuration"):
+    with pytest.raises(
+        ValueError, match="Failed to retrieve Rexec configuration"
+    ):
         client.setup_rexec_environment(requirements=["numpy==1.26.0"])
