@@ -29,46 +29,28 @@ from .update_s3_method import APIClientS3Update
 from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
-# Optional export for the remote execution decorator.
+
+# Optional dependency: scidx-rexec.
+# Expose `ndp_ep.remote_func` lazily so importing ndp_ep works without scidx-rexec.
+# (from ndp_ep import remote_func) raises ImportError if scidx-rexec is missing.
+from typing import Any
+
 try:
-    from rexec.client_api import remote_func as remote_func  # type: ignore
-except ImportError as exc:
+    from rexec.client_api import remote_func as _remote_func
+except ImportError:
+    _remote_func = None
 
-    class _RemoteFuncProxy:
-        """
-        When end users do 'from ndp_ep import remote_func' and tries to use remote_func,
-        if scidx-rexec is NOT installed, provide a lazy proxy that raises a error
-        """
 
-        def __init__(self, error: ImportError):
-            self._error = error
-            self._target = None
+def __getattr__(name: str) -> Any:
+    if name == "remote_func":
+        if _remote_func is None:
+            raise ImportError(
+                "scidx-rexec is required for remote execution. "
+                "Install by 'pip install ndp-ep[rexec]'"
+            )
+        return _remote_func
+    raise AttributeError(name)
 
-        def _load(self):
-            if self._target is None:
-                try:
-                    from rexec.client_api import remote_func as _rf  # type: ignore
-                except ImportError as err:
-                    raise ImportError(
-                        "scidx-rexec is required for remote execution. "
-                        "Install 'pip install ndp-ep[rexec]' to use ndp_ep.remote_func."
-                    ) from err
-                self._target = _rf
-            return self._target
-
-        def __call__(self, *args, **kwargs):
-            return self._load()(*args, **kwargs)
-
-        def __getattr__(self, item):
-            return getattr(self._load(), item)
-
-        def __setattr__(self, name, value):
-            if name in {"_error", "_target"}:
-                object.__setattr__(self, name, value)
-            else:
-                setattr(self._load(), name, value)
-
-    remote_func = _RemoteFuncProxy(exc)
 
 __version__ = "0.5.0"
 __description__ = "Python client library for NDP EP API"

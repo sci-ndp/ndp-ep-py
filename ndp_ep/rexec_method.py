@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 from requests.exceptions import HTTPError
 
@@ -25,19 +25,19 @@ class APIClientRexec(APIClientBase):
         token: str | None = None,
         *,
         api_path: str = "/rexec",
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Provision and configure a remote execution environment.
 
         Args:
             requirements: Path to requirements.txt or iterable of requirement
                 specifiers.
-            token: Optional Keycloak access token containing the user's identity.
-                When omitted, the client token established during initialization
-                is used.
+            token: Optional Keycloak access token for user's identity.
+                When omitted, the client token established during
+                initialization is used.
             api_path: Relative path to the rexec endpoint. The deployment API
-                URL is always resolved from querying the base API `/status/rexec`
-                endpoint.
+                URL is always resolved from querying the base API
+                `/status/rexec` endpoint.
 
         Returns:
             Dictionary containing the remote execution configuration details.
@@ -51,8 +51,8 @@ class APIClientRexec(APIClientBase):
         resolved_token = token or self.token
         if not resolved_token:
             raise ValueError(
-                "Token is required. Provide a token argument or initialize the "
-                "client with an authentication token."
+                "Token is required. Provide a token argument or initialize "
+                "the client with an authentication token."
             )
 
         # rexec_url = "http://localhost:8000/rexec"
@@ -68,18 +68,19 @@ class APIClientRexec(APIClientBase):
         finally:
             cleanup()
 
-        config = self._fetch_rexec_broker_config(rexec_url)
+        broker_config = self._fetch_rexec_broker_config(rexec_url)
         self._configure_remote_func(
-            remote_func, config, default_api_url=rexec_url
+            remote_func, broker_config, default_api_url=rexec_url
         )
-        return config
+        return broker_config
 
-    def _require_remote_func(self):
+    def _require_remote_func(self) -> Any:
         if (
             _REMOTE_FUNC is None
         ):  # pragma: no cover - depends on optional install
             raise ValueError(
-                "SciDx-rexec is not installed. Install it to enable remote execution."
+                "scidx-rexec is not installed. "
+                "Install it to enable remote execution."
             )
         return _REMOTE_FUNC
 
@@ -97,8 +98,8 @@ class APIClientRexec(APIClientBase):
                 raise ValueError(f"Requirements file not found: {req_path}")
             return req_path, lambda: None
 
-        # otherwise, if 'requirements' is a sequence of strings, write to a temp file
-        # example: reqs = ["pandas==2.2.3", "numpy>=1.26", "pyarrow>=16.0,<17.0"]
+        # if 'requirements' is a sequence of strings, write to a temp file
+        # example: reqs = ["pandas==2.2.3", "numpy>=1.26"]
         tmp = NamedTemporaryFile("w", suffix=".txt", delete=False)
         tmp_path = Path(tmp.name)
         try:
@@ -127,7 +128,8 @@ class APIClientRexec(APIClientBase):
         path = api_path if api_path.startswith("/") else f"/{api_path}"
         deployment_api_url = deployment_api_url.rstrip("/")
 
-        # Avoid double-appending the path if already included in the deployment URL.
+        # Avoid double-appending the path
+        # if already included in the deployment URL.
         if deployment_api_url.endswith(path):
             return deployment_api_url
 
@@ -135,7 +137,8 @@ class APIClientRexec(APIClientBase):
 
     def _fetch_rexec_deployment_api_url(self) -> str:
         """
-        Retrieve the Rexec deployment API base URL from the base NDP Endpoint API.
+        Retrieve the Rexec deployment API base URL
+        from the base NDP Endpoint API.
         """
         status_url = f"{self.base_url}/status/rexec"
         response = self.session.get(status_url)
@@ -143,7 +146,8 @@ class APIClientRexec(APIClientBase):
             response.raise_for_status()
         except HTTPError as exc:
             raise ValueError(
-                f"Failed to retrieve Rexec deployment endpoint: {response.text or exc}"
+                f"Failed to retrieve Rexec deployment endpoint: "
+                f"{response.text or exc}"
             ) from exc
 
         try:
@@ -161,7 +165,7 @@ class APIClientRexec(APIClientBase):
 
         return str(deployment_api_url).rstrip("/")
 
-    def _fetch_rexec_broker_config(self, rexec_url: str) -> dict:
+    def _fetch_rexec_broker_config(self, rexec_url: str) -> dict[str, Any]:
         """
         Retrieve broker and API configuration for the remote execution server.
         """
@@ -171,7 +175,8 @@ class APIClientRexec(APIClientBase):
             response.raise_for_status()
         except HTTPError as exc:
             raise ValueError(
-                f"Failed to retrieve Rexec broker configuration: {response.text or exc}"
+                f"Failed to retrieve Rexec broker configuration: "
+                f"{response.text or exc}"
             ) from exc
 
         try:
@@ -183,8 +188,8 @@ class APIClientRexec(APIClientBase):
 
     @staticmethod
     def _configure_remote_func(
-        remote_func,
-        config: dict,
+        remote_func: Any,
+        config: dict[str, Any],
         *,
         default_api_url: str,
     ) -> None:
@@ -198,7 +203,8 @@ class APIClientRexec(APIClientBase):
         broker_port: Optional[Union[str, int]] = config.get(
             "broker_external_port"
         ) or config.get("broker_port")
-        # Fallback: parse "host:port" formatted external_url if explicit parts missing.
+        # Fallback: parse "host:port" formatted external_url
+        # if explicit parts missing.
         if (not broker_addr or not broker_port) and config.get(
             "broker_external_url"
         ):

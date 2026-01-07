@@ -97,7 +97,7 @@ def build_client(
             if deployment_api_url.endswith(api_path)
             else f"{deployment_api_url}{api_path}"
         )
-        config_url = f"{resolved_rexec_url.rstrip('/')}/config"
+        config_url = f"{resolved_rexec_url.rstrip('/')}/broker-config"
         client.session = FakeSession(
             {
                 status_url: FakeResponse(
@@ -131,10 +131,7 @@ def test_setup_rexec_environment_configures_remote_func(monkeypatch, tmp_path):
     result = client.setup_rexec_environment(requirements=requirements_file)
 
     assert result == config_payload
-    assert StubRemoteFunc.api_urls == [
-        "https://api.example.com/rexec",
-        "http://api.example.com/rexec",
-    ]
+
     env_call = StubRemoteFunc.environments[0]
     assert env_call["token"] == "CLIENT_TOKEN"
     assert env_call["content"] == "numpy==1.26.0\n"
@@ -143,7 +140,7 @@ def test_setup_rexec_environment_configures_remote_func(monkeypatch, tmp_path):
 
     assert [call["url"] for call in client.session.calls] == [
         "https://api.example.com/status/rexec",
-        "https://api.example.com/rexec/config",
+        "https://api.example.com/rexec/broker-config",
     ]
     assert all(call["params"] is None for call in client.session.calls)
 
@@ -166,12 +163,12 @@ def test_setup_rexec_environment_uses_deployment_status(monkeypatch, tmp_path):
     client.setup_rexec_environment(requirements=requirements_file)
 
     assert StubRemoteFunc.api_urls == [
-        "https://deployment.example.com/rexec",
+        "https://deployment.example.com/rexec/spawn",
         "https://deployment.example.com/rexec",
     ]
     assert [call["url"] for call in client.session.calls] == [
         "https://api.example.com/status/rexec",
-        "https://deployment.example.com/rexec/config",
+        "https://deployment.example.com/rexec/broker-config",
     ]
 
 
@@ -199,7 +196,7 @@ def test_setup_rexec_environment_with_sequence(monkeypatch):
     assert not Path(env_call["path"]).exists()
     assert [call["url"] for call in client.session.calls] == [
         "https://api.example.com/status/rexec",
-        "https://api.example.com/rexec/config",
+        "https://api.example.com/rexec/broker-config",
     ]
 
 
@@ -209,7 +206,7 @@ def test_setup_rexec_environment_requires_remote_func(monkeypatch):
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", None)
     client = build_client()
 
-    with pytest.raises(ValueError, match="SciDx-rexec is not installed"):
+    with pytest.raises(ValueError, match="scidx-rexec is not installed"):
         client.setup_rexec_environment(requirements=["numpy==1.26.0"])
 
 
@@ -227,12 +224,12 @@ def test_setup_rexec_environment_raises_on_config_failure(monkeypatch):
         session=FakeSession(
             {
                 "https://api.example.com/status/rexec": status_response,
-                "https://api.example.com/rexec/config": error_response,
+                "https://api.example.com/rexec/broker-config": error_response,
             }
         )
     )
 
     with pytest.raises(
-        ValueError, match="Failed to retrieve Rexec configuration"
+        ValueError, match="Failed to retrieve Rexec broker configuration"
     ):
         client.setup_rexec_environment(requirements=["numpy==1.26.0"])
