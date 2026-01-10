@@ -29,6 +29,29 @@ from .update_s3_method import APIClientS3Update
 from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
+
+# Optional dependency: scidx-rexec.
+# Expose `ndp_ep.remote_func` lazily so importing ndp_ep works without scidx-rexec.
+# (from ndp_ep import remote_func) raises ImportError if scidx-rexec is missing.
+from typing import Any
+
+try:
+    from rexec.client_api import remote_func as _remote_func
+except ImportError:
+    _remote_func = None
+
+
+def __getattr__(name: str) -> Any:
+    if name == "remote_func":
+        if _remote_func is None:
+            raise ImportError(
+                "scidx-rexec is required for remote execution. "
+                "Install by 'pip install ndp-ep[rexec]'"
+            )
+        return _remote_func
+    raise AttributeError(name)
+
+
 __version__ = "0.5.0"
 __description__ = "Python client library for NDP EP API"
 
@@ -36,6 +59,7 @@ __description__ = "Python client library for NDP EP API"
 __all__ = [
     "APIClient",
     "APIClientBase",
+    "remote_func",
     "__version__",
     "__description__",
 ]

@@ -14,6 +14,7 @@ from .register_organization_method import APIClientOrganizationRegister
 from .register_s3_method import APIClientS3Register
 from .register_service_method import APIClientServiceRegister
 from .register_url_method import APIClientURLRegister
+from .rexec_method import APIClientRexec
 from .resource_method import APIClientResource
 from .s3_buckets_method import APIClientS3Buckets
 from .s3_objects_method import APIClientS3Objects
@@ -48,6 +49,7 @@ class APIClient(
     APIClientUserInfo,
     APIClientS3Buckets,
     APIClientS3Objects,
+    APIClientRexec,
     APIClientPelican,
 ):
     """
@@ -69,6 +71,7 @@ class APIClient(
     - S3 objects management (upload, download, delete, list, metadata)
     - Pelican federation (browse, download, import metadata)
     - Authentication (token-based and username/password)
+    - Remote execution environment provisioning
 
     Example:
         >>> client = APIClient(
