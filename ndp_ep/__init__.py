@@ -52,7 +52,7 @@ def __getattr__(name: str) -> Any:
     raise AttributeError(name)
 
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __description__ = "Python client library for NDP EP API"
 
 # Main exports

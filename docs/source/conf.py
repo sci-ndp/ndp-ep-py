@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "ndp-ep"
 copyright = "2025, NDP EP Team"
 author = "NDP EP Team"
-release = "0.5.0"
-version = "0.5.0"
+release = "0.6.0"
+version = "0.6.0"
 
 # Extensions - minimal set for GitHub Pages
 extensions = [
