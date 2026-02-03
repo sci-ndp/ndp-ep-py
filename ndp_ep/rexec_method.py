@@ -74,7 +74,7 @@ class APIClientRexec(APIClientBase):
         self._configure_remote_func(
             remote_func, broker_config, default_api_url=rexec_url
         )
-        return resp
+        return resp.json()
 
     def _require_remote_func(self) -> Any:
         if (
