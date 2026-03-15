@@ -61,7 +61,9 @@ class APIClientRexec(APIClientBase):
 
         requirements_path, cleanup = self._prepare_requirements(requirements)
         try:
-            remote_func.set_environment(
+            # POST to spawn api endpoint to deploy server
+            # Save resolved_token to remote_func.exec_token
+            resp = remote_func.set_environment(
                 str(requirements_path),
                 resolved_token,
             )
@@ -72,7 +74,7 @@ class APIClientRexec(APIClientBase):
         self._configure_remote_func(
             remote_func, broker_config, default_api_url=rexec_url
         )
-        return broker_config
+        return resp.json()
 
     def _require_remote_func(self) -> Any:
         if (
