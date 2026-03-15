@@ -29,7 +29,6 @@ from .update_s3_method import APIClientS3Update
 from .update_service_method import APIClientServiceUpdate
 from .update_url_method import APIClientURLUpdate
 
-
 # Optional dependency: scidx-rexec.
 # Expose `ndp_ep.remote_func` lazily so importing ndp_ep works without scidx-rexec.
 # (from ndp_ep import remote_func) raises ImportError if scidx-rexec is missing.
