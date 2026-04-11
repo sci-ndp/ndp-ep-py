@@ -133,9 +133,33 @@ class TestAPIVersionChecking:
                 )
 
                 assert client.api_version is None
-                assert len(w) == 1
-                assert issubclass(w[0].category, UserWarning)
-                assert "Could not determine API version" in str(w[0].message)
+                # No warning should be issued - only logged via logging
+                assert len(w) == 0
+
+    def test_version_check_missing_version_field_logs_info(
+        self, mock_api_base
+    ):
+        """Test that missing version field logs info message."""
+        with requests_mock.Mocker() as m:
+            m.get(mock_api_base, status_code=200)
+            m.get(
+                f"{mock_api_base}/status/",
+                json={"status": "healthy"},
+                status_code=200,
+            )
+
+            import logging
+
+            with patch(
+                "ndp_ep.client_base.logger"
+            ) as mock_logger:
+                APIClientBase(
+                    base_url=mock_api_base, token="test-token"
+                )
+                mock_logger.info.assert_called_once()
+                assert "Could not determine API version" in str(
+                    mock_logger.info.call_args
+                )
 
     def test_version_check_alternative_version_fields(self, mock_api_base):
         """Test version check with alternative version field names."""
