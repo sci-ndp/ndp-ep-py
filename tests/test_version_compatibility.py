@@ -150,12 +150,8 @@ class TestAPIVersionChecking:
 
             import logging
 
-            with patch(
-                "ndp_ep.client_base.logger"
-            ) as mock_logger:
-                APIClientBase(
-                    base_url=mock_api_base, token="test-token"
-                )
+            with patch("ndp_ep.client_base.logger") as mock_logger:
+                APIClientBase(base_url=mock_api_base, token="test-token")
                 mock_logger.info.assert_called_once()
                 assert "Could not determine API version" in str(
                     mock_logger.info.call_args
