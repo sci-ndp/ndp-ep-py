@@ -1,5 +1,6 @@
 """Base class for the API client."""
 
+import logging
 import warnings
 from typing import Optional
 from urllib.parse import urlparse
@@ -7,6 +8,8 @@ from urllib.parse import urlparse
 import requests
 
 from .version_config import get_minimum_version, is_version_compatible
+
+logger = logging.getLogger(__name__)
 
 
 class APIClientBase:
@@ -150,11 +153,10 @@ class APIClientBase:
                     )
             else:
                 # Version information not available in status response
-                warnings.warn(
-                    "Could not determine API version from status endpoint. "
-                    "Version compatibility cannot be verified.",
-                    UserWarning,
-                    stacklevel=3,
+                logger.info(
+                    "Could not determine API version from status "
+                    "endpoint. Version compatibility cannot be "
+                    "verified."
                 )
 
         except requests.exceptions.RequestException:
