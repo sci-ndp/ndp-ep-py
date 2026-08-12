@@ -247,9 +247,9 @@ class TestAPIVersionChecking:
         with requests_mock.Mocker() as m:
             # Mock initial connection check
             m.get(mock_api_base, status_code=200)
-            # Mock token endpoint
+            # Mock login endpoint
             m.post(
-                f"{mock_api_base}/token",
+                f"{mock_api_base}/user/login",
                 json={"access_token": "test-token"},
                 status_code=200,
             )

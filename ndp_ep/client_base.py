@@ -179,10 +179,10 @@ class APIClientBase:
         Raises:
             ValueError: If authentication fails or connection error occurs.
         """
-        url = f"{self.base_url}/token"
+        url = f"{self.base_url}/user/login"
         try:
             response = self.session.post(
-                url, data={"username": username, "password": password}
+                url, json={"username": username, "password": password}
             )
             response.raise_for_status()
             token_data = response.json()

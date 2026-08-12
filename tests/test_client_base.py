@@ -44,7 +44,7 @@ class TestAPIClientBase:
         """Test initialization with username and password."""
         with requests_mock.Mocker() as m:
             m.post(
-                "http://example.com/token",
+                "http://example.com/user/login",
                 json={"access_token": "retrieved-token"},
                 status_code=200,
             )
@@ -115,7 +115,7 @@ class TestAPIClientBase:
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
             m.post(
-                "http://example.com/token",
+                "http://example.com/user/login",
                 json={"access_token": "new-token"},
                 status_code=200,
             )
@@ -132,11 +132,36 @@ class TestAPIClientBase:
                 client.session.headers["Authorization"] == "Bearer new-token"
             )
 
+    def test_get_token_posts_json_to_user_login(self):
+        """
+        The Endpoint API exposes ``POST /user/login`` and reads a JSON body,
+        not a form-encoded ``/token``. Lock both so the client keeps talking to
+        the route the server actually serves.
+        """
+        with requests_mock.Mocker() as m:
+            m.get("http://example.com", status_code=200)
+            m.post(
+                "http://example.com/user/login",
+                json={"access_token": "new-token"},
+                status_code=200,
+            )
+            m.get(
+                "http://example.com/status/",
+                json={"version": "1.0.0"},
+                status_code=200,
+            )
+            client = APIClientBase(base_url="http://example.com")
+            client.get_token("user", "pass")
+
+            request = m.request_history[-1]
+            assert request.url == "http://example.com/user/login"
+            assert request.json() == {"username": "user", "password": "pass"}
+
     def test_get_token_no_access_token_in_response(self):
         """Test token retrieval when no access token in response."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
-            m.post("http://example.com/token", json={}, status_code=200)
+            m.post("http://example.com/user/login", json={}, status_code=200)
             client = APIClientBase(base_url="http://example.com")
             with pytest.raises(ValueError, match="No access token received"):
                 client.get_token("user", "pass")
@@ -146,7 +171,7 @@ class TestAPIClientBase:
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
             m.post(
-                "http://example.com/token",
+                "http://example.com/user/login",
                 exc=requests.exceptions.ConnectionError,
             )
             client = APIClientBase(base_url="http://example.com")
@@ -157,7 +182,7 @@ class TestAPIClientBase:
         """Test token retrieval with 401 unauthorized."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
-            m.post("http://example.com/token", status_code=401)
+            m.post("http://example.com/user/login", status_code=401)
             client = APIClientBase(base_url="http://example.com")
             with pytest.raises(
                 ValueError, match="Invalid username or password"
@@ -168,7 +193,7 @@ class TestAPIClientBase:
         """Test token retrieval with general HTTP error."""
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
-            m.post("http://example.com/token", status_code=500)
+            m.post("http://example.com/user/login", status_code=500)
             client = APIClientBase(base_url="http://example.com")
             with pytest.raises(ValueError, match="HTTP error occurred"):
                 client.get_token("user", "pass")
@@ -178,7 +203,7 @@ class TestAPIClientBase:
         with requests_mock.Mocker() as m:
             m.get("http://example.com", status_code=200)
             m.post(
-                "http://example.com/token",
+                "http://example.com/user/login",
                 exc=requests.exceptions.RequestException("Test error"),
             )
             client = APIClientBase(base_url="http://example.com")
