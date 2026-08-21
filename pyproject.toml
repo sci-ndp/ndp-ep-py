@@ -45,6 +45,7 @@ pelican = [
     # The core package stays importable on 3.8: the pelicanfs import is
     # guarded, and only the direct-access methods are unavailable.
     "pelicanfs>=1.0.0",
+    "websockets>=11.0",
 ]
 dev = [
     "pytest>=7.0.0",
@@ -118,3 +119,11 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+# The optional Pelican dependencies ship type information but target newer
+# interpreters than this package does, so analysing their source fails on
+# syntax alone. Only their public surface matters here.
+[[tool.mypy.overrides]]
+module = ["websockets.*", "pelicanfs.*"]
+follow_imports = "skip"
+ignore_missing_imports = true

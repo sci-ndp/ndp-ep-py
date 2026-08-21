@@ -16,6 +16,7 @@ from .get_system_status_method import APIClientSystemStatus
 from .get_user_info_method import APIClientUserInfo
 from .list_organization_method import APIClientOrganizationList
 from .pelican_data_method import APIClientPelicanData
+from .pelican_events_method import APIClientPelicanEvents
 from .pelican_method import APIClientPelican
 from .register_dataset_method import APIClientDatasetRegister
 from .register_kafka_method import APIClientKafkaRegister
