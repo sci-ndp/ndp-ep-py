@@ -38,6 +38,14 @@ rexec = [
     # Remote execution helper that provides `remote_func`
     "scidx-rexec>=0.0.0",
 ]
+pelican = [
+    # Direct access to Pelican federation objects from the client process.
+    # NOTE: pelicanfs itself requires Python >=3.11, so this extra cannot be
+    # installed on the 3.8-3.10 interpreters that the core package supports.
+    # The core package stays importable on 3.8: the pelicanfs import is
+    # guarded, and only the direct-access methods are unavailable.
+    "pelicanfs>=1.0.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
