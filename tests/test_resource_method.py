@@ -8,8 +8,16 @@ from ndp_ep import APIClient
 
 @pytest.fixture
 def client():
-    """Create an API client for testing."""
-    return APIClient(base_url="http://test-api.com", token="test-token")
+    """Create an API client for testing.
+
+    The client must be built inside the mocker: passing a token makes
+    __init__ call _check_api_version(), which requests /status/. Left
+    unmocked that reaches the real network and, with no timeout on the
+    session, blocks the whole suite.
+    """
+    with requests_mock.Mocker() as m:
+        m.get("http://test-api.com/status/", json={"version": "0.2.0"})
+        return APIClient(base_url="http://test-api.com", token="test-token")
 
 
 class TestGetResource:
