@@ -27,6 +27,7 @@ class StubPelicanFileSystem:
         self.federation_url = federation_url
         self.cat_calls = []
         self.get_calls = []
+        self.ls_calls = []
         StubPelicanFileSystem.instances.append(self)
 
     @classmethod
@@ -39,6 +40,19 @@ class StubPelicanFileSystem:
         if path not in self.contents:
             raise FileNotFoundError(path)
         return self.contents[path]
+
+    def ls(self, path, detail=False):
+        self.ls_calls.append((path, detail))
+        prefix = path.rstrip("/") + "/"
+        names = sorted(k for k in self.contents if k.startswith(prefix))
+        if not names:
+            raise FileNotFoundError(path)
+        if detail:
+            return [
+                {"name": n, "size": len(self.contents[n]), "type": "file"}
+                for n in names
+            ]
+        return names
 
     def get_file(self, rpath, lpath):
         self.get_calls.append((rpath, lpath))
@@ -296,3 +310,60 @@ class TestPelicanFetch:
         """A bare federation alias has no object name either."""
         with pytest.raises(ValueError, match="Cannot derive a file name"):
             client.pelican_fetch("osdf", tmp_path)
+
+
+class TestPelicanList:
+    """Listing a namespace."""
+
+    def test_returns_paths(self, client, stub_filesystem):
+        """A listing returns the object paths."""
+        stub_filesystem.contents = {OBJECT: PAYLOAD, "/vdc/other.csv": PAYLOAD}
+
+        result = client.pelican_list("osdf/vdc/public/pelican_protocol")
+
+        assert result == [OBJECT]
+
+    def test_detail_returns_dictionaries(self, client, stub_filesystem):
+        """With detail the entries describe each object."""
+        stub_filesystem.contents = {OBJECT: PAYLOAD}
+
+        result = client.pelican_list(
+            "osdf/vdc/public/pelican_protocol", detail=True
+        )
+
+        assert result[0]["name"] == OBJECT
+        assert result[0]["size"] == len(PAYLOAD)
+
+    def test_normalises_the_path(self, client, stub_filesystem):
+        """The filesystem is asked for the normalised path."""
+        stub_filesystem.contents = {OBJECT: PAYLOAD}
+
+        client.pelican_list("osdf://vdc/public/pelican_protocol/")
+
+        instance = stub_filesystem.instances[0]
+        assert instance.ls_calls == [("/vdc/public/pelican_protocol", False)]
+
+    def test_missing_namespace(self, client, stub_filesystem):
+        """An unknown namespace raises a ValueError naming the path."""
+        with pytest.raises(ValueError, match="Namespace not found"):
+            client.pelican_list("osdf/vdc/nope")
+
+    def test_wraps_transport_errors(
+        self, client, stub_filesystem, monkeypatch
+    ):
+        """Unexpected filesystem errors surface as ValueError."""
+
+        def explode(self, path, detail=False):
+            raise RuntimeError("director unreachable")
+
+        monkeypatch.setattr(stub_filesystem, "ls", explode)
+
+        with pytest.raises(ValueError, match="director unreachable"):
+            client.pelican_list("osdf/vdc/public/pelican_protocol")
+
+    def test_without_pelicanfs(self, client, monkeypatch):
+        """Without the optional dependency the error says how to fix it."""
+        monkeypatch.setattr(pelican_data_method, "_PelicanFileSystem", None)
+
+        with pytest.raises(ValueError, match=r"ndp-ep\[pelican\]"):
+            client.pelican_list("osdf/vdc/public/pelican_protocol")

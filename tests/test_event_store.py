@@ -92,3 +92,32 @@ class TestEventStore:
 
         assert results.count(True) == 1
         assert store.processed_count == 1
+
+    def test_count_survives_close(self, tmp_path):
+        """The total is still readable after closing.
+
+        Reporting a subscription's totals is the natural last thing to
+        do with it, and that happens after close.
+        """
+        store = EventStore(tmp_path / "events.sqlite3", "client-a")
+        store.record("e1", "sub/osdf/a", "{}")
+        store.record("e2", "sub/osdf/a", "{}")
+        store.close()
+
+        assert store.processed_count == 2
+        assert store.closed is True
+
+    def test_close_is_idempotent(self, tmp_path):
+        """Closing twice does not raise."""
+        store = EventStore(tmp_path / "events.sqlite3", "client-a")
+        store.record("e1", "sub/osdf/a", "{}")
+        store.close()
+        store.close()
+
+        assert store.processed_count == 1
+
+    def test_not_closed_initially(self, tmp_path):
+        """A fresh store reports itself open."""
+        assert EventStore(tmp_path / "events.sqlite3", "client-a").closed is (
+            False
+        )

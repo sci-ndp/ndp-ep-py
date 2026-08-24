@@ -558,3 +558,28 @@ class TestMixin:
 
         with subscription:
             assert subscription.wait_until_connected(timeout=10) is True
+
+
+class TestStatusAfterClose:
+    """Reporting on a subscription once it has been closed."""
+
+    def test_status_is_readable_after_close(self, server, tmp_path):
+        """Asking for metrics after close must not raise."""
+        subscription = subscribe(server, tmp_path).start()
+        collect(subscription, 3)
+        subscription.close()
+
+        status = subscription.status
+
+        assert status["state"] == "closed"
+        assert status["subscription"]["active"] is False
+        assert status["metrics"]["events_delivered"] == 3
+        assert status["processed_total"] == 3
+
+    def test_status_after_close_without_events(self, server, tmp_path):
+        """The same holds when nothing was ever delivered."""
+        subscription = subscribe(server, tmp_path).start()
+        subscription.wait_until_connected(timeout=10)
+        subscription.close()
+
+        assert subscription.status["processed_total"] >= 0

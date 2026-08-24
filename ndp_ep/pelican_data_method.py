@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from .client_base import APIClientBase
 
@@ -197,6 +197,53 @@ class APIClientPelicanData(APIClientBase):
             ) from exc
 
         return bytes(content)
+
+    def pelican_list(
+        self,
+        reference: str,
+        federation: str = DEFAULT_FEDERATION,
+        detail: bool = False,
+    ) -> Union[List[str], List[Dict[str, Any]]]:
+        """
+        List the objects in a Pelican namespace.
+
+        Like `pelican_read`, this talks to the federation directly; the
+        NDP Endpoint is not involved. Use `browse_pelican` instead when
+        the caller cannot reach the federation itself.
+
+        Args:
+            reference: Namespace path. See `split_pelican_reference`
+                for the accepted forms.
+            federation: Federation to assume when the reference does not
+                name one (default "osdf").
+            detail: Return a dictionary per object (name, size, type)
+                instead of just the paths.
+
+        Returns:
+            The object paths, or dictionaries describing them when
+            `detail` is set.
+
+        Raises:
+            ValueError: If pelicanfs is not installed, the reference is
+                invalid, or the namespace cannot be listed.
+
+        Example:
+            >>> client.pelican_list("osdf/vdc/public/data")[:2]
+            ['/vdc/public/data/a.csv', '/vdc/public/data/b.csv']
+        """
+        federation_url, path = split_pelican_reference(reference, federation)
+        filesystem = self._pelican_filesystem(federation_url)
+
+        try:
+            return filesystem.ls(path, detail=detail)
+        except FileNotFoundError as exc:
+            raise ValueError(
+                f"Namespace not found in {federation_url}: {path}"
+            ) from exc
+        except Exception as exc:
+            raise ValueError(
+                f"Error listing {path} in {federation_url}: {exc}"
+            ) from exc
 
     def pelican_fetch(
         self,

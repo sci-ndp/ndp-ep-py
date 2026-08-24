@@ -50,6 +50,8 @@ class EventStore:
         # subscription's; SQLite objects are not safe to share across
         # threads without both of these.
         self._lock = threading.Lock()
+        self._closed = False
+        self._final_count = 0
         self._db = sqlite3.connect(str(self.path), check_same_thread=False)
         with self._db:
             self._db.execute(_SCHEMA)
@@ -88,15 +90,35 @@ class EventStore:
 
     @property
     def processed_count(self) -> int:
-        """Number of distinct events recorded for this client."""
+        """Number of distinct events recorded for this client.
+
+        Still answerable after `close`, which is when a caller is most
+        likely to ask: reporting a subscription's totals is the natural
+        last thing to do with it.
+        """
         with self._lock:
+            if self._closed:
+                return self._final_count
             row = self._db.execute(
                 "SELECT COUNT(*) FROM processed_events WHERE client_id = ?",
                 (self.client_id,),
             ).fetchone()
         return int(row[0])
 
+    @property
+    def closed(self) -> bool:
+        """Whether the database has been closed."""
+        return self._closed
+
     def close(self) -> None:
-        """Close the database."""
+        """Close the database, keeping the final count readable."""
         with self._lock:
+            if self._closed:
+                return
+            row = self._db.execute(
+                "SELECT COUNT(*) FROM processed_events WHERE client_id = ?",
+                (self.client_id,),
+            ).fetchone()
+            self._final_count = int(row[0])
             self._db.close()
+            self._closed = True
