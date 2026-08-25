@@ -9,19 +9,28 @@ from ndp_ep.rexec_method import APIClientRexec
 class StubRemoteFunc:
     api_urls = []
     environments = []
+    terminations = []
     remote_addr = None
     remote_port = None
+    terminate_response = None
 
     @classmethod
     def reset(cls):
         cls.api_urls = []
         cls.environments = []
+        cls.terminations = []
         cls.remote_addr = None
         cls.remote_port = None
+        cls.terminate_response = None
 
     @classmethod
     def set_api_url(cls, url):
         cls.api_urls.append(url)
+
+    @classmethod
+    def terminate_environment(cls, api_url, usr_token=None):
+        cls.terminations.append({"url": api_url, "token": usr_token})
+        return cls.terminate_response
 
     @classmethod
     def set_environment(cls, filename, usr_token=None):
@@ -233,3 +242,63 @@ def test_setup_rexec_environment_raises_on_config_failure(monkeypatch):
         ValueError, match="Failed to retrieve Rexec broker configuration"
     ):
         client.setup_rexec_environment(requirements=["numpy==1.26.0"])
+
+
+def test_terminate_rexec_environment_calls_delete(monkeypatch):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+    StubRemoteFunc.terminate_response = FakeResponse({"Status": "deleted"})
+
+    client = build_client(deployment_api_url="https://deployment.example.com/rexec")
+
+    result = client.terminate_rexec_environment()
+
+    assert result == {"Status": "deleted"}
+    assert StubRemoteFunc.terminations == [
+        {
+            "url": "https://deployment.example.com/rexec/terminate",
+            "token": "CLIENT_TOKEN",
+        }
+    ]
+    # Only the deployment-URL lookup is needed; no broker-config call on teardown.
+    assert [call["url"] for call in client.session.calls] == [
+        "https://api.example.com/status/rexec",
+    ]
+
+
+def test_terminate_rexec_environment_uses_explicit_token(monkeypatch):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+    StubRemoteFunc.terminate_response = FakeResponse({})
+
+    client = build_client()
+
+    client.terminate_rexec_environment(token="EXPLICIT_TOKEN")
+
+    assert StubRemoteFunc.terminations[0]["token"] == "EXPLICIT_TOKEN"
+
+
+def test_terminate_rexec_environment_requires_token(monkeypatch):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+
+    client = build_client(token=None)
+
+    with pytest.raises(ValueError, match="Token is required"):
+        client.terminate_rexec_environment()
+
+
+def test_terminate_rexec_environment_requires_remote_func(monkeypatch):
+    import ndp_ep.rexec_method as rexec_module
+
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", None)
+    client = build_client()
+
+    with pytest.raises(ValueError, match="scidx-rexec is not installed"):
+        client.terminate_rexec_environment()

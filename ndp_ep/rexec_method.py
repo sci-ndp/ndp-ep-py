@@ -76,6 +76,47 @@ class APIClientRexec(APIClientBase):
         )
         return resp.json() if resp is not None else broker_config
 
+    def terminate_rexec_environment(
+        self,
+        token: str | None = None,
+        *,
+        api_path: str = "/rexec",
+    ) -> dict[str, Any]:
+        """
+        Terminate (delete) the caller's remote execution server.
+
+        Args:
+            token: Optional Keycloak access token for the user's identity.
+                When omitted, the client token established during
+                initialization is used.
+            api_path: Relative path to the rexec endpoint. The deployment API
+                URL is resolved by querying the base API `/status/rexec`
+                endpoint.
+
+        Returns:
+            Dictionary containing the deployment API's teardown status response.
+
+        Raises:
+            ValueError: If SciDx-rexec is not installed, authentication details
+                are missing, or the API call fails.
+        """
+        remote_func = self._require_remote_func()
+
+        resolved_token = token or self.token
+        if not resolved_token:
+            raise ValueError(
+                "Token is required. Provide a token argument or initialize "
+                "the client with an authentication token."
+            )
+
+        rexec_url = self._resolve_rexec_url(api_path=api_path)
+        # DELETE the user's server via the deployment API /terminate endpoint.
+        resp = remote_func.terminate_environment(
+            f"{rexec_url}/terminate",
+            resolved_token,
+        )
+        return resp.json() if resp is not None else {}
+
     def _require_remote_func(self) -> Any:
         if (
             _REMOTE_FUNC is None
