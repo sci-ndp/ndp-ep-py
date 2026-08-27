@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **The Pelican events tutorial now matches what the event server actually does.** A newly connected subscriber receives nothing for the first few minutes — measured runs waited between two and four — after which the server delivers its queued events in a burst. The notebook assumed events would start arriving immediately, so the cell that reads the raw events bounded its wait at 120 seconds — below that startup delay — and ended having printed nothing, which read as a failure rather than a timeout. Both event loops now wait on a single `EVENT_TIMEOUT` that comfortably exceeds the delay, and the surrounding text describes the burst behaviour. The plotting loop, which previously iterated the subscription with no bound at all and could block indefinitely, is now bounded too.
+- **The tutorial no longer presents the end of a `pelican_list` result as the newest data.** The listing is lexicographic, not chronological — `AGMT.CI.LY_.20_c100.csv` sorts before `AGMT.CI.LY_.20_c99.csv` — so `objects[-1]` returned an old object that never changes. The browsing cells now name the object they use explicitly, and the text points to an event's `url` as the way to reach the most recent object.
+- Corrected the claim that a new subscriber never receives anything predating its connection: the first burst can include objects written shortly before it subscribed.
+
 ## [0.8.1] - 2026-08-12
 
 ### Fixed
