@@ -251,7 +251,9 @@ def test_terminate_rexec_environment_calls_delete(monkeypatch):
     monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
     StubRemoteFunc.terminate_response = FakeResponse({"Status": "deleted"})
 
-    client = build_client(deployment_api_url="https://deployment.example.com/rexec")
+    client = build_client(
+        deployment_api_url="https://deployment.example.com/rexec"
+    )
 
     result = client.terminate_rexec_environment()
 
