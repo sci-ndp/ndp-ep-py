@@ -109,26 +109,26 @@ class APIClientRexec(APIClientBase):
                 "the client with an authentication token."
             )
 
-rexec_url = self._resolve_rexec_url(api_path=api_path)
-# DELETE the user's server via the deployment API /terminate endpoint.
-resp = remote_func.terminate_environment(
-    f"{rexec_url}/terminate",
-    resolved_token,
-)
-if resp is None:
-    return {}
-try:
-    resp.raise_for_status()
-except HTTPError as exc:
-    raise ValueError(
-        f"Failed to terminate Rexec environment: {resp.text or exc}"
-    ) from exc
-try:
-    return resp.json()
-except ValueError as exc:
-    raise ValueError(
-        "Rexec terminate endpoint returned invalid JSON."
-    ) from exc
+        rexec_url = self._resolve_rexec_url(api_path=api_path)
+        # DELETE the user's server via the deployment API /terminate endpoint.
+        resp = remote_func.terminate_environment(
+            f"{rexec_url}/terminate",
+            resolved_token,
+        )
+        if resp is None:
+            return {}
+        try:
+            resp.raise_for_status()
+        except HTTPError as exc:
+            raise ValueError(
+                f"Failed to terminate Rexec environment: {resp.text or exc}"
+            ) from exc
+        try:
+            return resp.json()
+        except ValueError as exc:
+            raise ValueError(
+                "Rexec terminate endpoint returned invalid JSON."
+            ) from exc
 
     def _require_remote_func(self) -> Any:
         if (
