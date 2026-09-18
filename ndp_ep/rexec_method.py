@@ -110,18 +110,20 @@ class APIClientRexec(APIClientBase):
             )
 
         rexec_url = self._resolve_rexec_url(api_path=api_path)
-        # DELETE the user's server via the deployment API /terminate endpoint.
-        resp = remote_func.terminate_environment(
-            f"{rexec_url}/terminate",
-            resolved_token,
-        )
-        if resp is None:
-            return {}
+        # DELETE the user's server via the deployment API /terminate endpoint,
+        # through the remote_func.terminate_environment, 
+        # which handles the request and error checking
         try:
-            resp.raise_for_status()
-        except HTTPError as exc:
+            resp = remote_func.terminate_environment(
+                f"{rexec_url}/terminate",
+                resolved_token,
+            )
+        # remote_func.terminate_environment raises RuntimeError on any
+        # non-ok response and only ever returns a successful one.
+        # catch rexec side's RuntimeError and re-raise as ValueError
+        except RuntimeError as exc:
             raise ValueError(
-                f"Failed to terminate Rexec environment: {resp.text or exc}"
+                f"Failed to terminate Rexec environment: {exc}"
             ) from exc
         try:
             return resp.json()

@@ -13,6 +13,7 @@ class StubRemoteFunc:
     remote_addr = None
     remote_port = None
     terminate_response = None
+    terminate_error = None
 
     @classmethod
     def reset(cls):
@@ -22,6 +23,7 @@ class StubRemoteFunc:
         cls.remote_addr = None
         cls.remote_port = None
         cls.terminate_response = None
+        cls.terminate_error = None
 
     @classmethod
     def set_api_url(cls, url):
@@ -30,6 +32,8 @@ class StubRemoteFunc:
     @classmethod
     def terminate_environment(cls, api_url, usr_token=None):
         cls.terminations.append({"url": api_url, "token": usr_token})
+        if cls.terminate_error is not None:
+            raise cls.terminate_error
         return cls.terminate_response
 
     @classmethod
@@ -303,4 +307,24 @@ def test_terminate_rexec_environment_requires_remote_func(monkeypatch):
     client = build_client()
 
     with pytest.raises(ValueError, match="scidx-rexec is not installed"):
+        client.terminate_rexec_environment()
+
+
+def test_terminate_rexec_environment_wraps_runtime_error(monkeypatch):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+    StubRemoteFunc.terminate_error = RuntimeError(
+        "Failed to terminate remote execution server."
+    )
+
+    client = build_client()
+
+    # remote_func.terminate_environment raises RuntimeError on any non-ok
+    # response; ndp-ep must catch it and re-raise as ValueError per its
+    # documented contract.
+    with pytest.raises(
+        ValueError, match="Failed to terminate Rexec environment"
+    ):
         client.terminate_rexec_environment()
