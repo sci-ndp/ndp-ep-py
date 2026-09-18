@@ -111,7 +111,7 @@ class APIClientRexec(APIClientBase):
 
         rexec_url = self._resolve_rexec_url(api_path=api_path)
         # DELETE the user's server via the deployment API /terminate endpoint,
-        # through the remote_func.terminate_environment, 
+        # through the remote_func.terminate_environment,
         # which handles the request and error checking
         try:
             resp = remote_func.terminate_environment(
