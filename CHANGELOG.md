@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Direct access to Pelican federation objects, with the Endpoint out of the data path.** `pelican_read` returns an object's bytes in the caller's process and `pelican_fetch` writes it to disk, both reached through `pelicanfs` rather than proxied by the Endpoint, so the data moves from the origin to whoever asked for it. `pelican_list` enumerates the objects in a namespace. Available through the new `pelican` extra: `pip install "ndp-ep[pelican]"`.
+- **Subscriptions to a Pelican namespace's file events.** `subscribe_pelican` opens a subscription over the event protocol and yields events as they arrive, each carrying a reference that `pelican_read` or `pelican_fetch` can act on directly — which is the point of the pair: an event tells you what changed, and the reference lets you go and get it without a round trip through the Endpoint. The subscription exposes `wait_until_connected`, `events`, `status` and `close`, and one queue is kept per client id, so an id must not be shared between readers.
+- `terminate_rexec_environment(token=None, *, api_path="/rexec")` - Terminate (delete) the caller's remote execution server via the deployment API's `/terminate` endpoint
+
 ### Changed
 - **The Pelican events tutorial now leads with reading and downloading rather than with plotting.** The notebook opened on a plotting loop and left `pelican_read` and `pelican_fetch` to a closing section about browsing without a subscription, which inverted the story it exists to tell: the library's contribution is that an event hands you a reference you can act on directly, with the Endpoint out of the data path, and drawing a chart is only one thing a reader might then do. The order is now subscribe, inspect an event, read its object into memory, fetch it to disk — each driven by a reference taken from a real event — followed by an explicit divider marking where the library ends and a user's own workflow begins. The plotting example lives after that divider, and the namespace listing has moved below reading, since `pelican_list` is a secondary capability rather than the way into it.
 

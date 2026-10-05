@@ -76,6 +76,62 @@ class APIClientRexec(APIClientBase):
         )
         return resp.json() if resp is not None else broker_config
 
+    def terminate_rexec_environment(
+        self,
+        token: str | None = None,
+        *,
+        api_path: str = "/rexec",
+    ) -> dict[str, Any]:
+        """
+        Terminate (delete) the caller's remote execution server.
+
+        Args:
+            token: Optional Keycloak access token for the user's identity.
+                When omitted, the client token established during
+                initialization is used.
+            api_path: Relative path to the rexec endpoint. The deployment API
+                URL is resolved by querying the base API `/status/rexec`
+                endpoint.
+
+        Returns:
+            Dictionary containing the deployment API's teardown status response.
+
+        Raises:
+            ValueError: If SciDx-rexec is not installed, authentication details
+                are missing, or the API call fails.
+        """
+        remote_func = self._require_remote_func()
+
+        resolved_token = token or self.token
+        if not resolved_token:
+            raise ValueError(
+                "Token is required. Provide a token argument or initialize "
+                "the client with an authentication token."
+            )
+
+        rexec_url = self._resolve_rexec_url(api_path=api_path)
+        # DELETE the user's server via the deployment API /terminate endpoint,
+        # through the remote_func.terminate_environment,
+        # which handles the request and error checking
+        try:
+            resp = remote_func.terminate_environment(
+                f"{rexec_url}/terminate",
+                resolved_token,
+            )
+        # remote_func.terminate_environment raises RuntimeError on any
+        # non-ok response and only ever returns a successful one.
+        # catch rexec side's RuntimeError and re-raise as ValueError
+        except RuntimeError as exc:
+            raise ValueError(
+                f"Failed to terminate Rexec environment: {exc}"
+            ) from exc
+        try:
+            return resp.json()
+        except ValueError as exc:
+            raise ValueError(
+                "Rexec terminate endpoint returned invalid JSON."
+            ) from exc
+
     def _require_remote_func(self) -> Any:
         if (
             _REMOTE_FUNC is None
