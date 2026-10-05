@@ -144,3 +144,6 @@ dmypy.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Objects the Pelican tutorial downloads when it is run
+docs/source/tutorials/data/
