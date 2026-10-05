@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-05
+
 ### Added
 - **Direct access to Pelican federation objects, with the Endpoint out of the data path.** `pelican_read` returns an object's bytes in the caller's process and `pelican_fetch` writes it to disk, both reached through `pelicanfs` rather than proxied by the Endpoint, so the data moves from the origin to whoever asked for it. `pelican_list` enumerates the objects in a namespace. Available through the new `pelican` extra: `pip install "ndp-ep[pelican]"`.
 - **Subscriptions to a Pelican namespace's file events.** `subscribe_pelican` opens a subscription over the event protocol and yields events as they arrive, each carrying a reference that `pelican_read` or `pelican_fetch` can act on directly — which is the point of the pair: an event tells you what changed, and the reference lets you go and get it without a round trip through the Endpoint. The subscription exposes `wait_until_connected`, `events`, `status` and `close`, and one queue is kept per client id, so an id must not be shared between readers.
