@@ -45,7 +45,9 @@ pelican = [
     # The core package stays importable on 3.8: the pelicanfs import is
     # guarded, and only the direct-access methods are unavailable.
     "pelicanfs>=1.0.0",
-    "websockets>=11.0",
+    # 15.0 is the oldest version this client is known to work with:
+    # CI showed 13.1 failing to establish a session and 15.0 passing.
+    "websockets>=15.0",
 ]
 dev = [
     "pytest>=7.0.0",
