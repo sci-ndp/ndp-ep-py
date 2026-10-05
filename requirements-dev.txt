@@ -4,7 +4,11 @@ pytest-mock>=3.10.0
 requests-mock>=1.9.0
 # The Pelican event tests run a real WebSocket server on localhost, so
 # this is needed to test them even though it ships as the pelican extra.
-websockets>=11.0
+# Floored at 15.0 and marked: 13.1, the newest release that supports
+# Python 3.8, does not work with this client, and the pelican extra
+# cannot be installed there anyway because pelicanfs needs 3.11. The
+# event tests skip themselves when it is absent.
+websockets>=15.0; python_version >= "3.9"
 black>=22.0.0
 flake8>=5.0.0
 mypy>=1.0.0
