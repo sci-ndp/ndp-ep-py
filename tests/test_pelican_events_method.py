@@ -14,7 +14,11 @@ import time
 
 import pytest
 import requests_mock
-import websockets
+
+# Skipped rather than failed when absent: the core package supports
+# Python 3.8-3.10, where the pelican extra cannot be installed, and an
+# unguarded import here failed collection for the whole suite.
+websockets = pytest.importorskip("websockets")
 
 from ndp_ep._pelican_protocol import Frame, parse_frame
 from ndp_ep.pelican_events_method import (
