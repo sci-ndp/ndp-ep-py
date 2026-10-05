@@ -68,7 +68,15 @@ class TestEventStore:
 
     def test_expands_user_home(self, tmp_path, monkeypatch):
         """A path starting with ~ is expanded."""
+        # Each platform's expanduser reads its own variable: posixpath
+        # honours HOME, ntpath ignores it and consults USERPROFILE
+        # (then HOMEDRIVE/HOMEPATH). Setting only HOME left the
+        # expansion resolving to the real home directory on Windows,
+        # where the assertion failed and the store was created inside
+        # the user's own ~/.ndp_ep (issue #42). Both are set so the
+        # expansion stays under tmp_path wherever the suite runs.
         monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.setenv("USERPROFILE", str(tmp_path))
 
         store = EventStore("~/.ndp_ep/events.sqlite3", "client-a")
 
