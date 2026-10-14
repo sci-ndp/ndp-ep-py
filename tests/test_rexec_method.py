@@ -159,7 +159,9 @@ def test_setup_rexec_environment_configures_remote_func(monkeypatch, tmp_path):
     assert all(call["params"] is None for call in client.session.calls)
 
 
-def test_setup_rexec_environment_force_reinstall_defaults_false(monkeypatch, tmp_path):
+def test_setup_rexec_environment_force_reinstall_defaults_false(
+    monkeypatch, tmp_path
+):
     import ndp_ep.rexec_method as rexec_module
 
     StubRemoteFunc.reset()

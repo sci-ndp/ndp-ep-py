@@ -36,10 +36,11 @@ class APIClientRexec(APIClientBase):
             token: Optional Keycloak access token for user's identity.
                 When omitted, the client token established during
                 initialization is used.
-            force_reinstall: If a server with different requirements is already running
-                for this user, the deployment API responds with a 409 conflict
-                unless this is True, in which case the existing server is
-                replaced -- interrupting any job it is currently running.
+            force_reinstall: If a server with different requirements is
+                already running for this user, the deployment API responds
+                with a 409 conflict unless this is True, in which case the
+                existing server is replaced. It interrupts any job it is
+                currently running.
             api_path: Relative path to the rexec endpoint. The deployment API
                 URL is always resolved from querying the base API
                 `/status/rexec` endpoint.
