@@ -37,7 +37,7 @@ class StubRemoteFunc:
         return cls.terminate_response
 
     @classmethod
-    def set_environment(cls, filename, usr_token=None):
+    def set_environment(cls, filename, usr_token=None, force_reinstall=False):
         path = Path(filename)
         content = path.read_text()
         cls.environments.append(
@@ -45,6 +45,7 @@ class StubRemoteFunc:
                 "path": filename,
                 "token": usr_token,
                 "content": content,
+                "force_reinstall": force_reinstall,
             }
         )
 
@@ -156,6 +157,41 @@ def test_setup_rexec_environment_configures_remote_func(monkeypatch, tmp_path):
         "https://api.example.com/rexec/broker-config",
     ]
     assert all(call["params"] is None for call in client.session.calls)
+
+
+def test_setup_rexec_environment_force_reinstall_defaults_false(monkeypatch, tmp_path):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+
+    client = build_client(config_payload={})
+
+    requirements_file = tmp_path / "requirements.txt"
+    requirements_file.write_text("numpy==1.26.0\n")
+
+    client.setup_rexec_environment(requirements=requirements_file)
+
+    assert StubRemoteFunc.environments[0]["force_reinstall"] is False
+
+
+def test_setup_rexec_environment_passes_force_reinstall(monkeypatch, tmp_path):
+    import ndp_ep.rexec_method as rexec_module
+
+    StubRemoteFunc.reset()
+    monkeypatch.setattr(rexec_module, "_REMOTE_FUNC", StubRemoteFunc)
+
+    client = build_client(config_payload={})
+
+    requirements_file = tmp_path / "requirements.txt"
+    requirements_file.write_text("numpy==1.26.0\n")
+
+    client.setup_rexec_environment(
+        requirements=requirements_file,
+        force_reinstall=True,
+    )
+
+    assert StubRemoteFunc.environments[0]["force_reinstall"] is True
 
 
 def test_setup_rexec_environment_uses_deployment_status(monkeypatch, tmp_path):
