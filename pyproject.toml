@@ -36,7 +36,7 @@ dependencies = [
 [project.optional-dependencies]
 rexec = [
     # Remote execution helper that provides `remote_func`
-    "scidx-rexec>=0.0.0",
+    "scidx-rexec>=0.1.0",
 ]
 pelican = [
     # Direct access to Pelican federation objects from the client process.
