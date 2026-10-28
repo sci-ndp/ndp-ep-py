@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-28
+
 ### Added
 - `setup_rexec_environment(..., force_reinstall=False)` replaces a running remote execution server whose requirements differ from the ones requested. Without it, the deployment API refuses such a request with a 409 conflict; with `force_reinstall=True` the existing server is torn down and redeployed, interrupting any job it is running. Calls that leave it unset behave as before.
 
